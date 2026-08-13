@@ -1,0 +1,18 @@
+{
+  "name": "sesamo",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Development and release tooling for the Sesamo WordPress plugin.",
+  "scripts": {
+    "test": "npm run lint:js && npm run test:js && npm run test:php && npm run version:check",
+    "test:js": "node --test tests/*.test.js",
+    "test:php": "php tests/php-smoke.php",
+    "lint:js": "node --check assets/js/sesamo.js && node --check assets/js/admin.js",
+    "version:check": "./scripts/check-versions.sh",
+    "build": "./scripts/build-release.sh"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "GPL-2.0-or-later"
+}

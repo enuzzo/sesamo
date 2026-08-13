@@ -1,0 +1,15 @@
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.zip binary
+
+/AGENTS.md export-ignore
+/.github export-ignore
+/tests export-ignore
+/scripts export-ignore
+/package.json export-ignore
+/SPECIFICATION.md export-ignore
+/ARCHITECTURE.md export-ignore
+/ROADMAP.md export-ignore
+/SECURITY.md export-ignore
+/CONTRIBUTING.md export-ignore
