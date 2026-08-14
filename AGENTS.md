@@ -23,8 +23,9 @@ Run before handoff:
 ```bash
 npm test
 ./scripts/build-release.sh
-unzip -t build/sesamo.zip
-(cd build && shasum -a 256 -c sesamo.zip.sha256)
+sesamo_version="$(node -p "require('./package.json').version")"
+unzip -t "build/sesamo-v${sesamo_version}.zip"
+(cd build && shasum -a 256 -c "sesamo-v${sesamo_version}.zip.sha256")
 ```
 
 Settings changes require current WordPress desktop, 600 px, and 320 px/200% zoom checks. Detector changes require Node tests. Option changes require migration and rollback documentation. Custom-combination changes require count, token, collision, destination, and malformed-data tests. Release candidates also require Plugin Check and the matrix in `docs/COMPATIBILITY.md`.
@@ -33,5 +34,6 @@ Settings changes require current WordPress desktop, 600 px, and 320 px/200% zoom
 
 - Synchronize plugin header, runtime constant, `package.json`, `readme.txt`, and `CHANGELOG.md`.
 - Build from a clean worktree, inspect the exact ZIP manifest, and publish the checksum.
+- Name release archives `sesamo-vMAJOR.MINOR.PATCH.zip`; never publish an anonymous `sesamo.zip`.
 - Tag `vMAJOR.MINOR.PATCH`; never rewrite a published tag.
 - Attach the tested ZIP and checksum to the GitHub release and use the identical tree for WordPress.org SVN.

@@ -4,7 +4,8 @@ set -euo pipefail
 project_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 build_dir="${project_dir}/build"
 stage_dir="${build_dir}/sesamo"
-zip_path="${build_dir}/sesamo.zip"
+sesamo_version="$(node -p "require('${project_dir}/package.json').version")"
+zip_path="${build_dir}/sesamo-v${sesamo_version}.zip"
 
 "${project_dir}/scripts/check-versions.sh"
 
@@ -17,6 +18,9 @@ php "${project_dir}/tests/php-smoke.php"
 
 rm -rf "${stage_dir}"
 rm -f "${zip_path}" "${zip_path}.sha256"
+# Remove the pre-versioned artifact name so Downloads folders do not become
+# an archaeological dig through several indistinguishable sesamo.zip files.
+rm -f "${build_dir}/sesamo.zip" "${build_dir}/sesamo.zip.sha256"
 mkdir -p "${stage_dir}/assets/css" "${stage_dir}/assets/images" "${stage_dir}/assets/js" "${stage_dir}/includes"
 
 cp "${project_dir}/sesamo.php" "${stage_dir}/"

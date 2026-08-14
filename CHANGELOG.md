@@ -4,6 +4,10 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ## Unreleased
 
+### Changed
+
+- Release artifacts now introduce themselves properly as `sesamo-vMAJOR.MINOR.PATCH.zip`, with a matching checksum. Mystery meat belongs in freezers, not Downloads folders.
+
 ### Planned
 
 - WordPress integration, accessibility, RTL, and mobile-admin verification.

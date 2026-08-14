@@ -34,8 +34,9 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         shell: bash
         run: |
+          artifact="build/sesamo-${GITHUB_REF_NAME}.zip"
           if [[ "${GITHUB_REF_NAME}" == v0.* ]]; then
-            gh release create "${GITHUB_REF_NAME}" build/sesamo.zip build/sesamo.zip.sha256 --verify-tag --generate-notes --prerelease --title "Sesamo ${GITHUB_REF_NAME#v}"
+            gh release create "${GITHUB_REF_NAME}" "${artifact}" "${artifact}.sha256" --verify-tag --generate-notes --prerelease --title "Sesamo ${GITHUB_REF_NAME#v}"
           else
-            gh release create "${GITHUB_REF_NAME}" build/sesamo.zip build/sesamo.zip.sha256 --verify-tag --generate-notes --title "Sesamo ${GITHUB_REF_NAME#v}"
+            gh release create "${GITHUB_REF_NAME}" "${artifact}" "${artifact}.sha256" --verify-tag --generate-notes --title "Sesamo ${GITHUB_REF_NAME#v}"
           fi

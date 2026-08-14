@@ -41,6 +41,7 @@ The short list future maintainers should read before making Sesamo “more flexi
 
 - Update the PHP header, runtime constant, `package.json`, `readme.txt` stable tag, and `CHANGELOG.md` together.
 - Git tags add `v`; WordPress versions and stable tags do not.
+- Release archives keep the `v`: `sesamo-vMAJOR.MINOR.PATCH.zip` and `sesamo-vMAJOR.MINOR.PATCH.zip.sha256`.
 - Build and inspect the exact ZIP that will be released. Never rebuild separately for GitHub and WordPress.org.
 - Do not add runtime packages for a matcher that fits comfortably in one reviewed file.
 - The compatibility event `konami-code-activator:matched` is deprecated but still cancelable. Removing it requires a documented major release.

@@ -14,8 +14,9 @@ Sesamo uses Semantic Versioning. Metadata contains `MAJOR.MINOR.PATCH`; Git tags
    ```bash
    npm test
    ./scripts/build-release.sh
-   unzip -l build/sesamo.zip
-   (cd build && shasum -a 256 -c sesamo.zip.sha256)
+   sesamo_version="$(node -p "require('./package.json').version")"
+   unzip -l "build/sesamo-v${sesamo_version}.zip"
+   (cd build && shasum -a 256 -c "sesamo-v${sesamo_version}.zip.sha256")
    ```
 
 5. Run current WordPress integration/E2E coverage, the official Plugin Check plugin, the WordPress.org readme validator, and the accessibility/viewport matrix in `COMPATIBILITY.md`.
@@ -23,7 +24,7 @@ Sesamo uses Semantic Versioning. Metadata contains `MAJOR.MINOR.PATCH`; Git tags
 
 ## Publish
 
-Create and push the signed or annotated tag `vX.Y.Z`. The release workflow verifies tag/version equality, builds once, and attaches `sesamo.zip` plus its SHA-256 checksum to the GitHub release.
+Create and push the signed or annotated tag `vX.Y.Z`. The release workflow verifies tag/version equality, builds once, and attaches `sesamo-vX.Y.Z.zip` plus its identically named `.sha256` checksum to the GitHub release. Versioned filenames are part of the release contract: mystery ZIPs have no place in a grown-up Downloads folder.
 
 For WordPress.org, deploy that exact verified tree to SVN `trunk` and copy it to numeric `tags/X.Y.Z`. Directory artwork from `.wordpress-org/` goes to SVN `/assets`, outside the plugin folder. Never substitute a locally rebuilt ZIP after the GitHub release.
 

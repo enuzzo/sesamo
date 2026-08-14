@@ -113,7 +113,7 @@ See [SECURITY.md](SECURITY.md) and the [security assessment](docs/SECURITY-ASSES
 From a release ZIP:
 
 1. open **Plugins → Add New → Upload Plugin**;
-2. upload `sesamo.zip` and activate it;
+2. upload the downloaded `sesamo-vX.Y.Z.zip` and activate it;
 3. open **Settings → Sesamo**;
 4. choose or record combinations, assign their destinations, and set the timing;
 5. save, then type like it is 1993.
@@ -161,10 +161,11 @@ Requirements: PHP 7.4+, Node.js 18+, and WordPress 6.3+ for integration testing.
 ```bash
 npm test
 ./scripts/build-release.sh
-unzip -l build/sesamo.zip
+sesamo_version="$(node -p "require('./package.json').version")"
+unzip -l "build/sesamo-v${sesamo_version}.zip"
 ```
 
-The release ZIP is allowlisted from runtime files, SHA-256 checksummed, and version-checked across the plugin header, runtime constant, `package.json`, WordPress stable tag, and changelog. Git tags use `vMAJOR.MINOR.PATCH`; the plugin metadata uses plain `MAJOR.MINOR.PATCH`.
+The release ZIP is allowlisted from runtime files, SHA-256 checksummed, and version-checked across the plugin header, runtime constant, `package.json`, WordPress stable tag, and changelog. Git tags and archive names use `vMAJOR.MINOR.PATCH`; plugin metadata uses plain `MAJOR.MINOR.PATCH`. No more guessing which `sesamo.zip` was the final-final-one.
 
 Read [SPECIFICATION.md](SPECIFICATION.md), [ARCHITECTURE.md](ARCHITECTURE.md), [AGENTS.md](AGENTS.md), and [docs/GOTCHAS.md](docs/GOTCHAS.md) before changing public behaviour. Release mechanics live in [docs/RELEASING.md](docs/RELEASING.md).
 

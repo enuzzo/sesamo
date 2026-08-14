@@ -32,7 +32,7 @@ No account. No cookies. No analytics. No remote requests. No custom database tab
 
 == Installation ==
 
-1. Upload `sesamo.zip` from Plugins > Add New > Upload Plugin.
+1. Upload the downloaded `sesamo-vX.Y.Z.zip` from Plugins > Add New > Upload Plugin.
 2. Activate Sesamo.
 3. Open Settings > Sesamo.
 4. Enable presets or record custom combinations, assign same-site destinations, and save.
