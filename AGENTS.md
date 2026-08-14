@@ -37,3 +37,4 @@ Settings changes require current WordPress desktop, 600 px, and 320 px/200% zoom
 - Name release archives `sesamo-vMAJOR.MINOR.PATCH.zip`; never publish an anonymous `sesamo.zip`.
 - Tag `vMAJOR.MINOR.PATCH`; never rewrite a published tag.
 - Attach the tested ZIP and checksum to the GitHub release and use the identical tree for WordPress.org SVN.
+- If `gh auth status` reports invalid credentials inside the sandbox while the user expects an authenticated session, rerun the check with escalated permissions before treating authentication as unavailable.

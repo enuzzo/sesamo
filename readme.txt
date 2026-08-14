@@ -3,7 +3,7 @@ Tags: easter egg, konami code, secret page, keyboard sequence, redirect
 Requires at least: 6.3
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 0.2.0
+Stable tag: 0.2.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -70,6 +70,11 @@ No. Sesamo has manners. Input, textarea, select, content-editable, repeated, com
 2. The responsive settings page on a narrow screen. Same controls, less elbow room, zero horizontal scroll.
 
 == Changelog ==
+
+= 0.2.1 =
+
+* Replaced the keyhole mark with the polished kawaii sesame wizard casting oversized illuminated `↑ ↓ B A` keycaps at a glowing storybook gate.
+* Added versioned release archive and checksum filenames.
 
 = 0.2.0 =
 
