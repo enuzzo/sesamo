@@ -7,6 +7,7 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 ### Changed
 
 - Release artifacts now introduce themselves properly as `sesamo-vMAJOR.MINOR.PATCH.zip`, with a matching checksum. Mystery meat belongs in freezers, not Downloads folders.
+- Replaced the austere keyhole mark with a hand-painted kawaii sesame wizard casting a four-button spell at a storybook gate. The old door has been reassigned to infrastructure.
 
 ### Planned
 
