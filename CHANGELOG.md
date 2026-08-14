@@ -4,15 +4,17 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ## Unreleased
 
-### Changed
-
-- Release artifacts now introduce themselves properly as `sesamo-vMAJOR.MINOR.PATCH.zip`, with a matching checksum. Mystery meat belongs in freezers, not Downloads folders.
-- Replaced the austere keyhole mark with a hand-painted kawaii sesame wizard casting an illuminated `↑ ↓ B A` spell at a storybook gate. The old door has been reassigned to infrastructure.
-
 ### Planned
 
 - WordPress integration, accessibility, RTL, and mobile-admin verification.
 - Official Plugin Check and WordPress.org readme validation.
+
+## 0.2.1 — 2026-08-14
+
+### Changed
+
+- Release artifacts now introduce themselves properly as `sesamo-vMAJOR.MINOR.PATCH.zip`, with a matching checksum. Mystery meat belongs in freezers, not Downloads folders.
+- Replaced the austere keyhole mark with a clean polished kawaii sesame wizard casting four oversized illuminated `↑ ↓ B A` keycaps at a glowing storybook gate. The approved mascot now appears in the settings header and WordPress.org artwork.
 
 ## 0.2.0 — 2026-08-14
 
