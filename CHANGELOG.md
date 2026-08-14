@@ -23,6 +23,9 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 - The frontend configuration now carries bounded routes rather than one shared destination.
 - Admin status counts only complete enabled routes.
 - Release archive timestamps are normalized so identical source trees produce identical ZIP checksums.
+- Plugin-directory copy now carries the same terse, self-aware voice as the GitHub README.
+- GitHub releases in the 0.x line are published explicitly as prereleases.
+- Added real desktop and narrow-screen settings screenshots for the WordPress.org listing.
 
 ### Security
 

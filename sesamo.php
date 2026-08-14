@@ -9,7 +9,7 @@
  * @wordpress-plugin
  * Plugin Name:       Sesamo — Secret Key Sequences
  * Plugin URI:        https://github.com/enuzzo/sesamo
- * Description:       Unlock a hidden WordPress page with the Konami Code, IDDQD, or your own key combination.
+ * Description:       Teach WordPress a secret knock: Konami Code, IDDQD, or your own combo opens a hidden page. Zero tracking. Maximum mischief.
  * Version:           0.2.0
  * Requires at least: 6.3
  * Requires PHP:      7.4

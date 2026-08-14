@@ -1,5 +1,4 @@
 === Sesamo — Secret Key Sequences ===
-Contributors: netmilkstudio
 Tags: easter egg, konami code, secret page, keyboard sequence, redirect
 Requires at least: 6.3
 Tested up to: 7.0
@@ -8,17 +7,28 @@ Stable tag: 0.2.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Unlock a hidden WordPress page with the Konami Code, IDDQD, or your own key combination. Easter eggs, done properly.
+Teach WordPress a secret knock: Konami Code, IDDQD, or your own combo opens a hidden page. Zero tracking. Maximum mischief.
 
 == Description ==
 
-Sesamo listens for built-in or custom keyboard combinations on public pages and routes each successful match to its own page on the same WordPress site.
+Give WordPress a secret knock.
 
-Enable any of ten built-in presets or create up to twenty custom combinations. Each active combination has its own destination. Sesamo ignores typing fields, content-editable regions, repeated keys, IME composition, and modified shortcuts. Disable every combination and no frontend script is loaded.
+Sesamo is a tiny easter-egg engine for WordPress. Arm the Konami Code, IDDQD, or any of ten built-in classics—or record your own combination—and send each successful match to its own page on the same site.
+
+Menus are civilised. Sometimes a door should open only after someone types the right incantation.
+
+**What Sesamo does:**
+
+* enables any mix of ten legendary cheat codes and up to twenty custom combinations;
+* gives every combination its own same-site destination;
+* includes an accessible recorder plus editable KeyboardEvent.key tokens;
+* disables duplicate, prefix, and suffix collisions instead of guessing;
+* ignores forms, editors, repeated keys, IME composition, and modified shortcuts;
+* loads zero frontend JavaScript when nothing is armed.
 
 **Important:** Sesamo is an easter egg, not authentication. The destination URL is visible to the browser and may be discovered. Sensitive content must enforce its own access control.
 
-No cookies. No analytics. No remote requests. No custom database tables. No third-party runtime dependencies.
+No account. No cookies. No analytics. No remote requests. No custom database tables. No third-party runtime dependencies. No tiny SaaS empire hiding inside your keyboard shortcut.
 
 == Installation ==
 
@@ -26,6 +36,7 @@ No cookies. No analytics. No remote requests. No custom database tables. No thir
 2. Activate Sesamo.
 3. Open Settings > Sesamo.
 4. Enable presets or record custom combinations, assign same-site destinations, and save.
+5. Type like it is 1993.
 
 == Frequently Asked Questions ==
 
@@ -39,19 +50,24 @@ Use Add combination, give it a name, record 2–64 keys or enter whitespace-sepa
 
 = Can I use an external destination? =
 
-No. Sesamo restricts navigation to the current WordPress origin. This keeps an easter-egg plugin from becoming an external redirect surface.
+No. The door stays in this building. Sesamo restricts navigation to the current WordPress origin so a playful plugin does not become an external redirect surface.
 
 = Is the destination secret or protected? =
 
-No. Visitors can inspect browser configuration or traffic and discover it. Apply real authorization to sensitive content.
+No. Hidden is not protected. Visitors can inspect browser configuration or traffic and discover it. Apply real authorization to sensitive content.
 
 = Can I disable detection without deactivating the plugin? =
 
-Yes. Clear every sequence and save. Sesamo then loads nothing on public pages.
+Yes. Clear every sequence and save. Sesamo then loads nothing on public pages—not even a dramatic farewell.
 
 = Does it run while someone is completing a form? =
 
-No. Input, textarea, select, content-editable, repeated, composing, and modified key events are ignored.
+No. Sesamo has manners. Input, textarea, select, content-editable, repeated, composing, and modified key events are ignored.
+
+== Screenshots ==
+
+1. The desktop settings page: built-in cheat codes, per-route destinations, and detector state without dashboard cosplay.
+2. The responsive settings page on a narrow screen. Same controls, less elbow room, zero horizontal scroll.
 
 == Changelog ==
 
