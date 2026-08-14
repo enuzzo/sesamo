@@ -6,7 +6,7 @@ The current accepted concept is [`design/admin-settings-custom-combinations-conc
 
 Unmistakably Sesamo, unmistakably WordPress: native controls and system typography; true white surfaces; deep ink text; emerald armed state; brass only for the safety boundary; sequence anatomy expressed as wrapping keycaps. Built-ins stay table-like; custom combinations use an open editing rail with no nested card grid. No custom dashboard shell, fake metrics, bento grid, external font, or animation is required to understand state.
 
-The brand mascot is the kawaii sesame-seed wizard in [`design/sesamo-mascot-icon-master.png`](design/sesamo-mascot-icon-master.png): emerald hood, four sequence orbs, and a half-open storybook gate. The mascot remains the focal point at 64 px; the gate is context, not the logo wearing a door costume.
+The brand mascot is the kawaii sesame-seed wizard in [`design/sesamo-mascot-icon-master.png`](design/sesamo-mascot-icon-master.png): emerald hood, four illuminated `↑ ↓ B A` keycaps, and a half-open storybook gate. The mascot remains the focal point at 64 px; the gate is context, not the logo wearing a door costume.
 
 ## Tokens
 
