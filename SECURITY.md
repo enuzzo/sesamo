@@ -15,10 +15,11 @@ Please do not publish suspected vulnerabilities in a public issue. Use GitHub’
 - Sensitive destinations must enforce their own access control.
 - Settings require `manage_options` and the WordPress Settings API nonce.
 - Options are structurally normalized on write and read.
-- Presets are allowlisted; timeouts are bounded; destinations are same-origin HTTP(S).
+- Presets are allowlisted; custom combinations are data-only and bounded to twenty routes with 2–64 normalized keys; timeouts are bounded; every destination is same-origin HTTP(S).
+- Duplicate, prefix, and suffix collisions are disabled so route selection is deterministic.
 - The detector ignores typing/editing contexts and modified input.
 - There is no telemetry, personal-data collection, remote request, runtime dependency, or custom table.
 
-Reportable issues include capability or CSRF bypass, stored/reflected script injection, cross-origin or unsafe URL handling, frontend execution while typing, unbounded resource use, privacy regressions, and dependency/release supply-chain compromise.
+Reportable issues include capability or CSRF bypass, stored/reflected script injection, custom-token validation bypass, ambiguous route execution, cross-origin or unsafe URL handling, frontend execution while typing, unbounded resource use, privacy regressions, and dependency/release supply-chain compromise.
 
 See [docs/SECURITY-ASSESSMENT.md](docs/SECURITY-ASSESSMENT.md) for the current threat model and residual risks.

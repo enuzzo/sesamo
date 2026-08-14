@@ -17,7 +17,9 @@ The short list future maintainers should read before making Sesamo “more flexi
 - Browser APIs cannot distinguish a normal active `<body>` from a closed shadow editor hosted directly on `<body>`. Such applications must place `data-sesamo-ignore` on `<body>`; this is a documented platform limitation, not an authentication risk.
 - Ctrl, Alt, Command, repeat, IME composition, and already-canceled events are ignored.
 - Long phrase presets omit spaces. Adding a preset that depends on whitespace would conflict with normal page interaction.
-- Preset order matters if one sequence becomes an exact suffix of another; add collision tests before shipping it.
+- Active sequences cannot duplicate, prefix, or suffix one another. PHP disables the later custom route and browser normalization independently keeps the first safe route.
+- The recorder reserves Escape to stop recording. Administrators can still enter the literal `Escape` token in the text field.
+- Custom sequence text is whitespace-separated. Use the named token `Space` for the space bar.
 
 ## WordPress behavior
 
@@ -38,7 +40,7 @@ The short list future maintainers should read before making Sesamo “more flexi
 ## Release traps
 
 - Update the PHP header, runtime constant, `package.json`, `readme.txt` stable tag, and `CHANGELOG.md` together.
-- Git tag: `v0.1.0`; WordPress version/stable tag: `0.1.0`.
+- Git tags add `v`; WordPress versions and stable tags do not.
 - Build and inspect the exact ZIP that will be released. Never rebuild separately for GitHub and WordPress.org.
 - Do not add runtime packages for a matcher that fits comfortably in one reviewed file.
 - The compatibility event `konami-code-activator:matched` is deprecated but still cancelable. Removing it requires a documented major release.

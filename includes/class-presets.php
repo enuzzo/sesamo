@@ -93,23 +93,4 @@ final class Presets
         return ['konami', 'iddqd'];
     }
 
-    public static function public_config(array $enabled_ids): array
-    {
-        $available = self::all();
-        $config    = [];
-
-        foreach ($enabled_ids as $id) {
-            if (!isset($available[$id])) {
-                continue;
-            }
-
-            $config[] = [
-                'id'       => $id,
-                'label'    => $available[$id]['label'],
-                'sequence' => $available[$id]['sequence'],
-            ];
-        }
-
-        return $config;
-    }
 }

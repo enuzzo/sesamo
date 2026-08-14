@@ -10,7 +10,7 @@ Read `SPECIFICATION.md`, `ARCHITECTURE.md`, `SECURITY.md`, `docs/GOTCHAS.md`, an
 - Preserve the option migration and public browser-event alias unless a documented major migration removes them.
 - Define built-in presets only in `Presets::all()`.
 - Normalize options on every read and save; the database is untrusted.
-- Never enqueue the frontend detector when no preset is enabled.
+- Never enqueue the frontend detector when no complete built-in or custom combination is enabled.
 - Do not add third-party runtime dependencies, telemetry, cookies, tracking, remote code, or external requests.
 - Keep UI copy, comments, tests, and public documentation in English.
 - Brand all plugin metadata as `Netmilk Studio sagl`.
@@ -27,7 +27,7 @@ unzip -t build/sesamo.zip
 (cd build && shasum -a 256 -c sesamo.zip.sha256)
 ```
 
-Settings changes require current WordPress desktop, 600 px, and 320 px/200% zoom checks. Detector changes require Node tests. Option changes require migration and rollback documentation. Release candidates also require Plugin Check and the matrix in `docs/COMPATIBILITY.md`.
+Settings changes require current WordPress desktop, 600 px, and 320 px/200% zoom checks. Detector changes require Node tests. Option changes require migration and rollback documentation. Custom-combination changes require count, token, collision, destination, and malformed-data tests. Release candidates also require Plugin Check and the matrix in `docs/COMPATIBILITY.md`.
 
 ## Release discipline
 

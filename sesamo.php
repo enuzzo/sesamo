@@ -9,8 +9,8 @@
  * @wordpress-plugin
  * Plugin Name:       Sesamo — Secret Key Sequences
  * Plugin URI:        https://github.com/enuzzo/sesamo
- * Description:       Unlock a hidden WordPress page with the Konami Code, IDDQD, or another classic secret sequence.
- * Version:           0.1.0
+ * Description:       Unlock a hidden WordPress page with the Konami Code, IDDQD, or your own key combination.
+ * Version:           0.2.0
  * Requires at least: 6.3
  * Requires PHP:      7.4
  * Author:            Netmilk Studio sagl
@@ -25,12 +25,13 @@ namespace NetmilkStudio\Sesamo;
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'NETMILK_SESAMO_VERSION', '0.1.0' );
+define( 'NETMILK_SESAMO_VERSION', '0.2.0' );
 define( 'NETMILK_SESAMO_FILE', __FILE__ );
 define( 'NETMILK_SESAMO_DIR', plugin_dir_path( __FILE__ ) );
 define( 'NETMILK_SESAMO_URL', plugin_dir_url( __FILE__ ) );
 
 require_once NETMILK_SESAMO_DIR . 'includes/class-presets.php';
+require_once NETMILK_SESAMO_DIR . 'includes/class-combinations.php';
 require_once NETMILK_SESAMO_DIR . 'includes/class-settings.php';
 require_once NETMILK_SESAMO_DIR . 'includes/class-frontend.php';
 

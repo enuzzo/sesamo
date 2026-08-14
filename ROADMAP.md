@@ -9,6 +9,14 @@
 - polished accessible admin UI and icon system;
 - unit/smoke tests, security assessment, docs, CI, reproducible ZIP, checksum.
 
+## 0.2 — custom routes
+
+- up to twenty administrator-authored combinations with 2–64 normalized keys;
+- one destination per built-in or custom combination;
+- accessible recorder plus no-magic text input;
+- deterministic prefix, suffix, and duplicate collision handling;
+- schema-2 migration and documented rollback behaviour.
+
 ## 1.0 — acceptance complete
 
 - real WordPress 6.3/current integration tests;
@@ -20,11 +28,9 @@
 
 ## Later candidates
 
-- per-preset destinations;
 - import/export with an explicit versioned schema;
 - administrator-only diagnostics and Site Health integration;
 - multisite policy;
-- safe custom sequence builder with strict count/token/size caps;
 - touch/gesture sequences and optional callbacks.
 
 ## Explicitly out of scope

@@ -17,10 +17,10 @@ final class Frontend {
 
 	/** Load the detector only when at least one valid sequence is enabled. */
 	public static function enqueue(): void {
-		$settings = Settings::get();
-		$presets  = Presets::public_config( $settings['enabled_presets'] );
+		$settings     = Settings::get();
+		$combinations = Settings::public_combinations( $settings );
 
-		if ( array() === $presets || '' === $settings['destination_url'] ) {
+		if ( array() === $combinations ) {
 			return;
 		}
 
@@ -33,9 +33,8 @@ final class Frontend {
 		);
 
 		$config = array(
-			'destinationUrl' => $settings['destination_url'],
-			'maxPause'       => (int) $settings['max_pause'],
-			'presets'        => $presets,
+			'combinations' => $combinations,
+			'maxPause'     => (int) $settings['max_pause'],
 		);
 
 		wp_add_inline_script(

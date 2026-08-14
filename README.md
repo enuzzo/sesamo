@@ -5,9 +5,9 @@
 [![No tracking](https://img.shields.io/badge/Tracking-absolutely_not-16845B?style=for-the-badge)](#good-citizen-mode)
 [![License](https://img.shields.io/badge/License-GPL--2.0--or--later-D9A441?style=for-the-badge)](LICENSE)
 
-**Unlock a hidden WordPress page with a secret key sequence. Konami Code, IDDQD, and more. Easter eggs, done properly.**
+**Unlock a hidden WordPress page with a secret key sequence. Konami Code, IDDQD, or your own combo. Easter eggs, done properly.**
 
-Sesamo is a tiny WordPress plugin by **Netmilk Studio sagl**. Pick one or more legendary keyboard sequences, point them at a page on your site, and carry on pretending the page does not exist. Visitors type the right incantation; Sesamo opens the door.
+Sesamo is a tiny WordPress plugin by **Netmilk Studio sagl**. Pick a legendary keyboard sequence or record your own, point each combination at a page on your site, and carry on pretending those pages do not exist. Visitors type the right incantation; Sesamo opens the right door.
 
 *Why “Sesamo”?* Because “Open Sesame” has had excellent backwards compatibility since roughly the 10th century. Also because `↑ ↑ ↓ ↓ ← → ← → B A` is a terrible password and a magnificent doorbell.
 
@@ -15,13 +15,15 @@ Sesamo is a tiny WordPress plugin by **Netmilk Studio sagl**. Pick one or more l
 
 ## What it does
 
-- arms any combination of ten built-in classic sequences;
-- redirects every match to one same-origin WordPress destination;
+- arms any combination of ten built-in classics or up to twenty custom sequences;
+- routes every combination to its own same-origin WordPress destination;
+- records custom keys accessibly or accepts explicit `KeyboardEvent.key` tokens;
+- disables duplicate, prefix, and suffix collisions instead of guessing which door you meant;
 - ignores inputs, textareas, selects, content-editable regions, repeated keys, IME composition, and modified shortcuts;
 - resets a partial sequence after a configurable 250–5,000 ms pause;
 - emits a cancelable `sesamo:matched` browser event before navigation;
 - loads **zero frontend JavaScript** when no sequence is active;
-- stores one normalized option and deletes it on uninstall;
+- stores one schema-versioned, normalized option and deletes it on uninstall;
 - makes no remote requests and brings no runtime dependencies to the party.
 
 ## The roster
@@ -56,7 +58,7 @@ From a release ZIP:
 1. open **Plugins → Add New → Upload Plugin**;
 2. upload `sesamo.zip` and activate it;
 3. open **Settings → Sesamo**;
-4. choose your sequences, destination, and timing;
+4. choose or record combinations, assign their destinations, and set the timing;
 5. save, then type like it is 1993.
 
 For development, clone the repository as `wp-content/plugins/sesamo/`.
@@ -65,22 +67,22 @@ For development, clone the repository as `wp-content/plugins/sesamo/`.
 
 ```js
 window.addEventListener("sesamo:matched", (event) => {
-  console.log(event.detail.preset.id, event.detail.destinationUrl);
+  console.log(event.detail.combination.id, event.detail.destinationUrl);
 
   // event.preventDefault(); // keep the door closed
 });
 ```
 
-The pre-release event name `konami-code-activator:matched` is also dispatched for migration and is deprecated. Either event may cancel navigation.
+`event.detail.combination` identifies the matched built-in or custom route. The compatibility `event.detail.preset` projection and pre-release event name `konami-code-activator:matched` remain available through the 0.x line. Either event may cancel navigation.
 
 ## Under the tiny hood
 
 ```text
-normalized WordPress option
+schema-versioned WordPress option
         ↓
-allowlisted preset registry
+built-in registry + bounded custom combinations
         ↓
-same-origin JSON config + bounded matcher
+per-route same-origin config + collision-safe bounded matcher
         ↓
 cancelable event
         ↓
@@ -105,7 +107,7 @@ Read [SPECIFICATION.md](SPECIFICATION.md), [ARCHITECTURE.md](ARCHITECTURE.md), [
 
 ## Status
 
-`0.1.0` is the hardened bootstrap, not a victory parade. It has unit/smoke coverage and reproducible packaging; `1.0.0` remains reserved for acceptance-complete WordPress integration, accessibility, mobile-admin, and Plugin Check verification.
+`0.2.0` is the first feature-complete prerelease, not a victory parade. It has unit/smoke coverage and reproducible packaging; `1.0.0` remains reserved for acceptance-complete WordPress integration, accessibility, mobile-admin, and Plugin Check verification.
 
 ## License
 

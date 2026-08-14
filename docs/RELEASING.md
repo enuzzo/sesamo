@@ -30,3 +30,5 @@ For WordPress.org, deploy that exact verified tree to SVN `trunk` and copy it to
 ## Rollback
 
 Do not move or rewrite a published version tag. Fix forward with a higher patch version. If a release must be withdrawn, mark it clearly in GitHub/WordPress.org, retain forensic artifacts, and publish the replacement under a new version.
+
+Schema 2 retains `enabled_presets` and a `destination_url` bridge for emergency downgrade to 0.1. A 0.1 runtime ignores custom combinations and sends every enabled preset to that single bridge destination, so downgrade changes routing semantics. Before downgrading, export or back up `netmilk_sesamo_settings`, deactivate every custom route, and verify the bridge destination. Restoring the pre-upgrade database backup is the only exact rollback. Returning to 0.2 re-normalizes schema 2 without executing custom data.

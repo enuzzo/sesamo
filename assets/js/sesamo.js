@@ -15,13 +15,27 @@
   "use strict";
 
   function normalizeKey(key) {
+    if (key === " ") return "Space";
     return typeof key === "string" && key.length === 1 ? key.toLowerCase() : key;
+  }
+
+  function isEdge(shorter, longer) {
+    if (shorter.length === 0 || shorter.length > longer.length) return false;
+    const prefix = shorter.every((token, index) => token === longer[index]);
+    const offset = longer.length - shorter.length;
+    const suffix = shorter.every((token, index) => token === longer[offset + index]);
+    return prefix || suffix;
+  }
+
+  function sequencesConflict(first, second) {
+    return isEdge(first, second) || isEdge(second, first);
   }
 
   function normalizePresets(presets) {
     if (!Array.isArray(presets)) return [];
 
-    return presets
+    const normalized = presets
+      .slice(0, 30)
       .filter(
         (preset) =>
           preset &&
@@ -34,14 +48,41 @@
       )
       .map((preset) => ({
         id: preset.id,
-        label: typeof preset.label === "string" ? preset.label : preset.id,
+        label: typeof preset.label === "string" ? preset.label.slice(0, 64) : preset.id,
+        source: preset.source === "custom" ? "custom" : "preset",
         sequence: preset.sequence.map(normalizeKey),
+        destinationUrl: typeof preset.destinationUrl === "string" ? preset.destinationUrl : "",
       }));
+
+    const accepted = [];
+    for (const preset of normalized) {
+      if (!accepted.some((candidate) => sequencesConflict(preset.sequence, candidate.sequence))) {
+        accepted.push(preset);
+      }
+    }
+    return accepted;
+  }
+
+  function normalizeCombinations(config, root) {
+    const candidates = Array.isArray(config.combinations)
+      ? normalizePresets(config.combinations)
+      : normalizePresets(config.presets).map((preset) => ({
+          ...preset,
+          destinationUrl: config.destinationUrl,
+        }));
+
+    return candidates
+      .map((combination) => ({
+        ...combination,
+        destinationUrl: normalizeDestination(combination.destinationUrl, root),
+      }))
+      .filter((combination) => combination.destinationUrl !== "");
   }
 
   function normalizeDestination(destinationUrl, root) {
     if (
       typeof destinationUrl !== "string" ||
+      destinationUrl.length > 2048 ||
       !root ||
       !root.URL ||
       !root.location ||
@@ -165,6 +206,9 @@
     const event = new root.CustomEvent(type, {
       cancelable: true,
       detail: {
+        combination: { id: matched.id, label: matched.label, source: matched.source },
+        // Compatibility projection for 0.1 integrations. Custom combinations
+        // also expose their stable ID here until the next documented major.
         preset: { id: matched.id, label: matched.label },
         destinationUrl,
       },
@@ -175,12 +219,11 @@
   function boot(config, root) {
     if (!root || !root.addEventListener || root.__NETMILK_SESAMO_BOOTED__) return null;
 
-    const presets = normalizePresets(config.presets);
-    const destinationUrl = normalizeDestination(config.destinationUrl, root);
-    if (presets.length === 0 || destinationUrl === "") return null;
+    const combinations = normalizeCombinations(config, root);
+    if (combinations.length === 0) return null;
 
     root.__NETMILK_SESAMO_BOOTED__ = true;
-    const matcher = createMatcher(presets, config.maxPause);
+    const matcher = createMatcher(combinations, config.maxPause);
     let redirecting = false;
 
     const onKeyDown = (event) => {
@@ -200,12 +243,12 @@
       const matched = matcher.push(event.key, root.performance ? root.performance.now() : Date.now());
       if (!matched) return;
 
-      const allowed = dispatchMatch(root, "sesamo:matched", matched, destinationUrl);
-      const legacyAllowed = dispatchMatch(root, "konami-code-activator:matched", matched, destinationUrl);
+      const allowed = dispatchMatch(root, "sesamo:matched", matched, matched.destinationUrl);
+      const legacyAllowed = dispatchMatch(root, "konami-code-activator:matched", matched, matched.destinationUrl);
       if (!allowed || !legacyAllowed) return;
 
       redirecting = true;
-      navigate(destinationUrl, root);
+      navigate(matched.destinationUrl, root);
     };
 
     root.addEventListener("keydown", onKeyDown, { passive: true });
@@ -223,7 +266,9 @@
     isTypingContext,
     isTypingEvent,
     normalizeDestination,
+    normalizeCombinations,
     normalizeKey,
     normalizePresets,
+    sequencesConflict,
   };
 });

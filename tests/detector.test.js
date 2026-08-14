@@ -5,9 +5,11 @@ const {
   createMatcher,
   isTypingContext,
   isTypingEvent,
+	normalizeCombinations,
   normalizeDestination,
   normalizeKey,
   normalizePresets,
+	sequencesConflict,
 } = require("../assets/js/sesamo.js");
 
 const presets = [
@@ -65,11 +67,50 @@ function createRoot({ cancelType = "" } = {}) {
 test("normalizes letter keys without changing named keys", () => {
   assert.equal(normalizeKey("B"), "b");
   assert.equal(normalizeKey("ArrowUp"), "ArrowUp");
+	assert.equal(normalizeKey(" "), "Space");
 });
 
 test("filters malformed and oversized presets", () => {
   const oversized = { id: "long", sequence: Array(65).fill("x") };
-  assert.deepEqual(normalizePresets([null, {}, oversized, presets[1]]), [presets[1]]);
+	assert.deepEqual(normalizePresets([null, {}, oversized, presets[1]]), [
+	  { ...presets[1], source: "preset", destinationUrl: "" },
+	]);
+});
+
+test("rejects ambiguous prefix and suffix combinations", () => {
+	assert.equal(sequencesConflict([..."id"], [..."iddqd"]), true);
+	assert.equal(sequencesConflict([..."dqd"], [..."iddqd"]), true);
+	assert.equal(sequencesConflict([..."sesamo"], [..."iddqd"]), false);
+	assert.deepEqual(
+	  normalizePresets([
+		{ id: "long", sequence: [..."iddqd"] },
+		{ id: "prefix", sequence: [..."id"] },
+		{ id: "suffix", sequence: [..."dqd"] },
+	  ]).map(({ id }) => id),
+	  ["long"],
+	);
+});
+
+test("normalizes bounded per-combination destinations independently", () => {
+	const { root } = createRoot();
+	const combinations = normalizeCombinations(
+	  {
+		combinations: [
+		  { ...presets[1], source: "preset", destinationUrl: "/godmode/" },
+		  { id: "custom_vault", label: "Open the vault", source: "custom", sequence: [..."sesamo"], destinationUrl: "/vault/" },
+		  { id: "bad", sequence: [..."bad"], destinationUrl: "https://evil.example/" },
+		],
+	  },
+	  root,
+	);
+
+	assert.deepEqual(
+	  combinations.map(({ id, source, destinationUrl }) => ({ id, source, destinationUrl })),
+	  [
+		{ id: "iddqd", source: "preset", destinationUrl: "https://example.test/godmode/" },
+		{ id: "custom_vault", source: "custom", destinationUrl: "https://example.test/vault/" },
+	  ],
+	);
 });
 
 test("accepts only same-origin HTTP(S) destinations", () => {
@@ -78,6 +119,7 @@ test("accepts only same-origin HTTP(S) destinations", () => {
   assert.equal(normalizeDestination("https://evil.example/", root), "");
   assert.equal(normalizeDestination("javascript:alert(1)", root), "");
   assert.equal(normalizeDestination("https://user:password@example.test/hidden/", root), "");
+	assert.equal(normalizeDestination(`https://example.test/${"x".repeat(3000)}`, root), "");
 });
 
 test("matches every historical preset", () => {
@@ -123,10 +165,34 @@ test("boots, emits both events, redirects once, and tears down", () => {
   for (const key of "iddqd") keydown({ key, target: { tagName: "BODY" } });
 
   assert.deepEqual(events.map((event) => event.type), ["sesamo:matched", "konami-code-activator:matched"]);
+	assert.deepEqual(events[0].detail.combination, { id: "iddqd", label: "IDDQD", source: "preset" });
   assert.deepEqual(links, ["https://example.test/hidden/"]);
   teardown();
   assert.equal(listeners.has("keydown"), false);
   assert.equal(root.__NETMILK_SESAMO_BOOTED__, false);
+});
+
+test("routes a custom combination to its own destination", () => {
+	const { root, listeners, events, links } = createRoot();
+	boot(
+	  {
+		combinations: [
+		  { id: "iddqd", label: "IDDQD", source: "preset", sequence: [..."iddqd"], destinationUrl: "/godmode/" },
+		  { id: "custom_vault", label: "Open the vault", source: "custom", sequence: [..."sesamo"], destinationUrl: "/vault/" },
+		],
+		maxPause: 1500,
+	  },
+	  root,
+	);
+	for (const key of "sesamo") listeners.get("keydown")({ key, target: { tagName: "BODY" } });
+
+	assert.deepEqual(links, ["https://example.test/vault/"]);
+	assert.deepEqual(events[0].detail.combination, {
+	  id: "custom_vault",
+	  label: "Open the vault",
+	  source: "custom",
+	});
+	assert.equal(events[0].detail.destinationUrl, "https://example.test/vault/");
 });
 
 test("a listener can cancel navigation through either event", () => {

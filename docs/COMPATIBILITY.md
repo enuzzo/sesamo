@@ -23,14 +23,20 @@ The `Tested up to: 7.0` line is a target for the bootstrap and must not be used 
 - high contrast, reduced motion, and RTL;
 - validation recovery for invalid/cross-origin URL and timeout bounds;
 - armed/off state and no-script behavior;
+- add/remove/record/clear custom combinations with mouse and keyboard;
+- recorder Escape stop, manual `Escape` token entry, 64-key cap, and invalid-token recovery;
+- long custom names, URLs, and keycap wrapping at every viewport;
 - page-cache purge behavior documented for the target host.
 
 ## Runtime gate before 1.0
 
 - activation, migration, update, deactivation, uninstall;
+- schema-1 to schema-2 migration, stable custom IDs, and documented 0.1 rollback behaviour;
 - malformed/tampered option read on PHP 7.4 and 8.x;
 - multisite single-site activation behavior;
 - frontend enqueue present only when armed;
+- zero, one, twenty, and over-limit custom rows; partial rows; malformed nested values;
+- exact duplicate, prefix, suffix, preset/custom, and custom/custom collision cases;
 - same-origin enforcement with ports, HTTP/HTTPS, query, fragment, credentials, and protocol-relative inputs;
 - typing, nested content-editable, open/closed shadow-DOM composed paths, standard focused shadow hosts, `data-sesamo-ignore` on body-hosted closed shells, IME, modifiers, repeat, cancellation, teardown, and one-navigation behavior;
 - Plugin Check clean or every exception documented.

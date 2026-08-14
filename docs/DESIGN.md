@@ -1,10 +1,10 @@
 # Admin design specification
 
-The accepted concept is [`design/admin-settings-concept.png`](design/admin-settings-concept.png).
+The current accepted concept is [`design/admin-settings-custom-combinations-concept.png`](design/admin-settings-custom-combinations-concept.png). The original bootstrap reference remains at [`design/admin-settings-concept.png`](design/admin-settings-concept.png).
 
 ## Direction
 
-Unmistakably Sesamo, unmistakably WordPress: native controls and system typography; true white surfaces; deep ink text; emerald armed state; brass only for the safety boundary; sequence anatomy expressed as wrapping keycaps. No custom dashboard shell, fake metrics, bento grid, external font, or animation required to understand state.
+Unmistakably Sesamo, unmistakably WordPress: native controls and system typography; true white surfaces; deep ink text; emerald armed state; brass only for the safety boundary; sequence anatomy expressed as wrapping keycaps. Built-ins stay table-like; custom combinations use an open editing rail with no nested card grid. No custom dashboard shell, fake metrics, bento grid, external font, or animation is required to understand state.
 
 ## Tokens
 
@@ -20,4 +20,4 @@ Unmistakably Sesamo, unmistakably WordPress: native controls and system typograp
 | Brass | `#d9a441` |
 | Focus | WordPress `#2271b1` |
 
-The implementation keeps native checkbox semantics, field labels/help associations, explicit armed/off text, a field group legend, wrapping keycaps, logical border direction, reduced-motion behavior, and one-column mobile reflow.
+The implementation keeps native checkbox semantics, field labels/help associations, explicit armed/off text, field group legends, wrapping keycaps, logical border direction, reduced-motion behavior, and one-column mobile reflow. Recording is an enhancement over a real text input: Escape stops recording, Clear is explicit, preview updates are announced, and saved custom rows remain editable without JavaScript.
