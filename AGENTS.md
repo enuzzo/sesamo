@@ -2,6 +2,11 @@
 
 Read `SPECIFICATION.md`, `ARCHITECTURE.md`, `SECURITY.md`, `docs/GOTCHAS.md`, and the nearest task-specific document before modifying code.
 
+## Workspace discipline
+
+- Perform all Sesamo work inside the primary Dropbox checkout at `~/Library/CloudStorage/Dropbox/Mitnick/sesamo`; do not use Codex-managed worktrees or alternate clones.
+- Before handoff, return the Dropbox checkout to `main`, fast-forward it to `origin/main`, and verify that the worktree is clean.
+
 ## Project invariants
 
 - Keep Sesamo generic; do not add client-specific behavior.
