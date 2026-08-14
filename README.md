@@ -1,17 +1,46 @@
 # Sesamo
 
+[![CI](https://github.com/enuzzo/sesamo/actions/workflows/ci.yml/badge.svg)](https://github.com/enuzzo/sesamo/actions/workflows/ci.yml)
 [![WordPress](https://img.shields.io/badge/WordPress-6.3%2B-21759B?style=for-the-badge&logo=wordpress&logoColor=white)](https://wordpress.org/)
 [![PHP](https://img.shields.io/badge/PHP-7.4%E2%80%938.5-777BB4?style=for-the-badge&logo=php&logoColor=white)](https://www.php.net/)
 [![No tracking](https://img.shields.io/badge/Tracking-absolutely_not-16845B?style=for-the-badge)](#good-citizen-mode)
+[![Runtime dependencies](https://img.shields.io/badge/Runtime_dependencies-0-101C2C?style=for-the-badge)](#what-it-refuses-to-do)
 [![License](https://img.shields.io/badge/License-GPL--2.0--or--later-D9A441?style=for-the-badge)](LICENSE)
+
+> *“What if a WordPress page had no menu item, no button, and the only key was muscle memory from 1993?”*
+>
+> — someone who considers discoverability a negotiable feature
 
 **Unlock a hidden WordPress page with a secret key sequence. Konami Code, IDDQD, or your own combo. Easter eggs, done properly.**
 
-Sesamo is a tiny WordPress plugin by **Netmilk Studio sagl**. Pick a legendary keyboard sequence or record your own, point each combination at a page on your site, and carry on pretending those pages do not exist. Visitors type the right incantation; Sesamo opens the right door.
+**Sesamo** is an open-source WordPress easter-egg plugin by **Netmilk Studio sagl**. Pick a legendary keyboard sequence or record your own, point each combination at a page on your site, and carry on pretending those pages do not exist. Visitors type the right incantation; Sesamo opens the right door.
 
 *Why “Sesamo”?* Because “Open Sesame” has had excellent backwards compatibility since roughly the 10th century. Also because `↑ ↑ ↓ ↓ ← → ← → B A` is a terrible password and a magnificent doorbell.
 
-![Sesamo icon](.wordpress-org/icon-256x256.png)
+<p align="center">
+  <img src="docs/design/admin-settings-custom-combinations-render.png" alt="Sesamo settings with built-in and custom secret key combinations" width="100%">
+</p>
+
+<p align="center">
+  <a href="#what-it-does">Features</a> ·
+  <a href="#the-roster">Cheat codes</a> ·
+  <a href="#make-your-own-magic-word">Custom combos</a> ·
+  <a href="#install">Install</a> ·
+  <a href="#good-citizen-mode">Security</a> ·
+  <a href="#development">Development</a>
+</p>
+
+---
+
+## Why this exists
+
+WordPress already has enough plugins trying to become a dashboard, a cloud platform, a CRM, and a lifestyle brand before breakfast. Sesamo is not joining them.
+
+It listens for a bounded sequence of keys and opens a same-site URL. That is the product strategy. Our imaginary investors are furious.
+
+The actual use case is delightfully specific: campaign easter eggs, hidden launch pages, private jokes, alternate portfolios, credits screens, internal demos, or the page your client insists should be “secret, but fun.” Install one small plugin, choose a classic cheat code or invent your own, and give the site a piece of muscle memory.
+
+If you are protecting payroll with `IDDQD`, however, this README cannot save you.
 
 ## What it does
 
@@ -42,6 +71,34 @@ Sesamo is a tiny WordPress plugin by **Netmilk Studio sagl**. Pick a legendary k
 | HESOYAM | GTA: San Andreas | `HESOYAM` |
 
 Spaces in phrase-like codes are omitted. Sesamo is listening to keys, not writing a memoir.
+
+## Make your own magic word
+
+Built-in cheat codes are excellent cultural infrastructure. Sometimes you need a door only your particular group of nerds would think to knock on.
+
+Create up to twenty custom combinations. Each one gets:
+
+- a human name, because `custom_91de3b2d31f96c0a` is technically memorable only to a database;
+- an accessible key recorder plus editable `KeyboardEvent.key` tokens;
+- its own same-site destination;
+- an independent enabled switch;
+- collision checks against every active built-in and custom sequence.
+
+Try `s e s a m o`, `v a u l t`, or the name of the office Wi-Fi nobody remembers. Sesamo accepts printable single-key tokens and a deliberately small named-key set. It does not accept JavaScript, callbacks, macros, shell commands, or your pitch for a blockchain-powered shortcut marketplace.
+
+## What it refuses to do
+
+- become access control;
+- phone home;
+- collect analytics;
+- set cookies;
+- create database tables;
+- fetch remote presets;
+- intercept typing fields;
+- ship a framework to compare sixty-four tiny strings;
+- ask you to create an account for a keyboard shortcut.
+
+Some restraint was involved. We are as surprised as you are.
 
 ## Good citizen mode
 
@@ -90,6 +147,12 @@ no-referrer navigation
 ```
 
 There is no service, cron job, shortcode, REST route, cookie, or custom table. Sesamo has one job and has resisted the industry’s repeated attempts to give it Kubernetes.
+
+## Performance, or lack of drama
+
+The browser receives at most thirty routes: ten built-ins and twenty custom combinations. Every custom sequence is capped at sixty-four normalized keys. The matcher keeps one bounded rolling buffer, does no polling, and disappears entirely from the frontend when nothing is armed.
+
+No framework. No bundle step. No hydration. No tiny spinner apologizing for loading the concept of pressing `B`.
 
 ## Development
 
