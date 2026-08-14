@@ -31,4 +31,8 @@ jobs:
         run: ./scripts/build-release.sh
       - name: Inspect package
         if: matrix.php == '8.3'
-        run: unzip -t build/sesamo.zip
+        shell: bash
+        run: |
+          sesamo_version="$(node -p "require('./package.json').version")"
+          unzip -t "build/sesamo-v${sesamo_version}.zip"
+          (cd build && shasum -a 256 -c "sesamo-v${sesamo_version}.zip.sha256")
