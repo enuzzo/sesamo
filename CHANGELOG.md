@@ -9,6 +9,13 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 - WordPress integration, accessibility, RTL, and mobile-admin verification.
 - Official Plugin Check and WordPress.org readme validation.
 
+## 0.2.2 — 2026-08-14
+
+### Fixed
+
+- Versioned the settings icon URL so plugin updates cannot leave the previous artwork in browser or CDN caches.
+- Added the installed plugin version beside the Sesamo settings title.
+
 ## 0.2.1 — 2026-08-14
 
 ### Changed

@@ -10,7 +10,7 @@
  * Plugin Name:       Sesamo — Secret Key Sequences
  * Plugin URI:        https://github.com/enuzzo/sesamo
  * Description:       Teach WordPress a secret knock: Konami Code, IDDQD, or your own combo opens a hidden page. Zero tracking. Maximum mischief.
- * Version:           0.2.1
+ * Version:           0.2.2
  * Requires at least: 6.3
  * Requires PHP:      7.4
  * Author:            Netmilk Studio sagl
@@ -25,7 +25,7 @@ namespace NetmilkStudio\Sesamo;
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'NETMILK_SESAMO_VERSION', '0.2.1' );
+define( 'NETMILK_SESAMO_VERSION', '0.2.2' );
 define( 'NETMILK_SESAMO_FILE', __FILE__ );
 define( 'NETMILK_SESAMO_DIR', plugin_dir_path( __FILE__ ) );
 define( 'NETMILK_SESAMO_URL', plugin_dir_url( __FILE__ ) );

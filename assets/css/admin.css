@@ -35,14 +35,33 @@
   border-radius: 14px;
 }
 
-.sesamo-header__copy h1 {
+.sesamo-title-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   margin: 0 0 4px;
+}
+
+.sesamo-header__copy h1 {
+  margin: 0;
   padding: 0;
   color: var(--sesamo-ink);
   font-size: 32px;
   font-weight: 700;
   line-height: 1.1;
   letter-spacing: -.02em;
+}
+
+.sesamo-version {
+  padding: 2px 7px;
+  border: 1px solid var(--sesamo-border);
+  border-radius: 999px;
+  background: var(--sesamo-surface);
+  color: var(--sesamo-muted);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: .02em;
 }
 
 .sesamo-header__copy p {

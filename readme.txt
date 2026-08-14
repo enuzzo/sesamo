@@ -3,7 +3,7 @@ Tags: easter egg, konami code, secret page, keyboard sequence, redirect
 Requires at least: 6.3
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 0.2.1
+Stable tag: 0.2.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -70,6 +70,11 @@ No. Sesamo has manners. Input, textarea, select, content-editable, repeated, com
 2. The responsive settings page on a narrow screen. Same controls, less elbow room, zero horizontal scroll.
 
 == Changelog ==
+
+= 0.2.2 =
+
+* Versioned the settings icon URL so plugin updates cannot leave the previous artwork in browser or CDN caches.
+* Added the installed plugin version beside the Sesamo settings title.
 
 = 0.2.1 =
 
