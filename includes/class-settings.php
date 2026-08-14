@@ -288,9 +288,12 @@ final class Settings {
 		?>
 		<div class="wrap sesamo-wrap">
 			<header class="sesamo-header">
-				<img class="sesamo-mark" src="<?php echo esc_url( NETMILK_SESAMO_URL . 'assets/images/sesamo-icon.png' ); ?>" alt="" width="64" height="64" />
+				<img class="sesamo-mark" src="<?php echo esc_url( add_query_arg( 'ver', NETMILK_SESAMO_VERSION, NETMILK_SESAMO_URL . 'assets/images/sesamo-icon.png' ) ); ?>" alt="" width="64" height="64" />
 				<div class="sesamo-header__copy">
-					<h1><?php esc_html_e( 'Sesamo', 'sesamo' ); ?></h1>
+					<div class="sesamo-title-line">
+						<h1><?php esc_html_e( 'Sesamo', 'sesamo' ); ?></h1>
+						<span class="sesamo-version">v<?php echo esc_html( NETMILK_SESAMO_VERSION ); ?></span>
+					</div>
 					<p><?php esc_html_e( 'Secret sequence in. Hidden page out.', 'sesamo' ); ?></p>
 				</div>
 				<div class="sesamo-status <?php echo 0 === $active_count ? 'is-off' : 'is-armed'; ?>" data-sesamo-status data-title-armed="<?php esc_attr_e( 'Detector armed', 'sesamo' ); ?>" data-title-off="<?php esc_attr_e( 'Detection off', 'sesamo' ); ?>" aria-live="polite">

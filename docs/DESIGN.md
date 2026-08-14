@@ -8,6 +8,8 @@ Unmistakably Sesamo, unmistakably WordPress: native controls and system typograp
 
 The brand mascot is the kawaii sesame-seed wizard in [`design/sesamo-mascot-icon-master.png`](design/sesamo-mascot-icon-master.png): emerald hood, four illuminated `↑ ↓ B A` keycaps, and a half-open storybook gate. The mascot remains the focal point at 64 px; the gate is context, not the logo wearing a door costume.
 
+The settings header shows the installed plugin version beside the Sesamo title and versions the mascot URL with the same runtime constant, preventing stale artwork after plugin updates.
+
 ## Tokens
 
 | Role | Value |
