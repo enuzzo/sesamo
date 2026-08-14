@@ -29,6 +29,10 @@ cp "${project_dir}/assets/js/sesamo.js" "${stage_dir}/assets/js/"
 cp "${project_dir}/assets/js/admin.js" "${stage_dir}/assets/js/"
 cp "${project_dir}"/includes/*.php "${stage_dir}/includes/"
 
+# ZIP stores local timestamps. Pin every staged entry to the format's earliest
+# portable timestamp so identical source trees produce identical artifacts.
+find "${stage_dir}" -exec touch -t 198001010000 {} +
+
 (
   cd "${build_dir}"
   zip -r -X "${zip_path}" sesamo

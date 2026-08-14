@@ -22,6 +22,7 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 - The frontend configuration now carries bounded routes rather than one shared destination.
 - Admin status counts only complete enabled routes.
+- Release archive timestamps are normalized so identical source trees produce identical ZIP checksums.
 
 ### Security
 
