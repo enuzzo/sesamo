@@ -43,3 +43,12 @@ Settings changes require current WordPress desktop, 600 px, and 320 px/200% zoom
 - Tag `vMAJOR.MINOR.PATCH`; never rewrite a published tag.
 - Attach the tested ZIP and checksum to the GitHub release and use the identical tree for WordPress.org SVN.
 - If `gh auth status` reports invalid credentials inside the sandbox while the user expects an authenticated session, rerun the check with escalated permissions before treating authentication as unavailable.
+
+
+## Generated folders stay out of Dropbox
+
+This repo lives in Dropbox, which must not sync generated folders: thousands of small files slow Dropbox down on every Mac and break across architectures. Each Mac makes its own: `build`. On 2026-11-03 these were flagged on the Mac Studio:
+
+- `build/`
+
+On a Mac where one is missing, create the empty folder, flag it with `xattr -w 'com.apple.fileprovider.ignore#P' 1 <folder>`, check that `xattr -p` prints 1, and only then install or build into it. Flag any new generated folder the same way before its first build, keep it in `.gitignore`, and never commit it.
