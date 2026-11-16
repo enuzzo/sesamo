@@ -4,8 +4,8 @@ Read `SPECIFICATION.md`, `ARCHITECTURE.md`, `SECURITY.md`, `docs/GOTCHAS.md`, an
 
 ## Workspace discipline
 
-- Perform all Sesamo work inside the primary Dropbox checkout at `~/Library/CloudStorage/Dropbox/Mitnick/sesamo`; do not use Codex-managed worktrees or alternate clones.
-- Before handoff, return the Dropbox checkout to `main`, fast-forward it to `origin/main`, and verify that the worktree is clean.
+- Perform all Sesamo work inside the primary checkout at `~/Documents/Mitnick/sesamo` on local disk; do not use Codex-managed worktrees or alternate clones. The repo no longer lives in Dropbox: history travels between Macs through GitHub only.
+- Before handoff, return the checkout to `main`, fast-forward it to `origin/main`, and verify that the worktree is clean.
 
 ## Project invariants
 
@@ -43,12 +43,3 @@ Settings changes require current WordPress desktop, 600 px, and 320 px/200% zoom
 - Tag `vMAJOR.MINOR.PATCH`; never rewrite a published tag.
 - Attach the tested ZIP and checksum to the GitHub release and use the identical tree for WordPress.org SVN.
 - If `gh auth status` reports invalid credentials inside the sandbox while the user expects an authenticated session, rerun the check with escalated permissions before treating authentication as unavailable.
-
-
-## Generated folders stay out of Dropbox
-
-This repo lives in Dropbox, which must not sync generated folders: thousands of small files slow Dropbox down on every Mac and break across architectures. Each Mac makes its own: `build`. On 2026-11-03 these were flagged on the Mac Studio:
-
-- `build/`
-
-On a Mac where one is missing, create the empty folder, flag it with `xattr -w 'com.apple.fileprovider.ignore#P' 1 <folder>`, check that `xattr -p` prints 1, and only then install or build into it. Flag any new generated folder the same way before its first build, keep it in `.gitignore`, and never commit it.
