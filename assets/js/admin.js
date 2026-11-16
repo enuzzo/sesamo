@@ -14,6 +14,15 @@
   const maxCustom = Number(customList ? customList.dataset.max : 20) || 20;
   let nextIndex = customList ? customList.querySelectorAll("[data-sesamo-custom]").length : 0;
   let activeRecorder = null;
+  const form = root.querySelector("form");
+  const homeOrigin = form ? form.dataset.sesamoHome || "" : "";
+  const homeHost = form ? form.dataset.sesamoHost || "" : "";
+  const messages = {
+    other_site: form ? form.dataset.msgOtherSite : "",
+    other_scheme: form ? form.dataset.msgOtherScheme : "",
+    invalid: form ? form.dataset.msgInvalid : "",
+    empty: form ? form.dataset.msgEmpty : "",
+  };
 
   const namedKeys = new Map(
     [
@@ -80,10 +89,70 @@
     });
   }
 
+  // Mirrors Settings::destination_problem(): "" when usable, otherwise why not.
+  function destinationProblem(value) {
+    const raw = value.trim();
+    if (raw === "") return "empty";
+    if (raw.length > 2048) return "invalid";
+    if (raw.startsWith("/") && !raw.startsWith("//")) return "";
+    let url;
+    try {
+      url = new URL(raw.startsWith("//") ? `https:${raw}` : raw);
+    } catch {
+      return "invalid";
+    }
+    if (!["http:", "https:"].includes(url.protocol) || url.username || url.password || url.hostname === "") return "invalid";
+    if (homeOrigin && url.origin === homeOrigin) return "";
+    const homeHostname = homeHost.replace(/:\d+$/, "");
+    return url.hostname === homeHostname ? "other_scheme" : "other_site";
+  }
+
+  function suggestedPath(value, fallback) {
+    try {
+      const raw = value.trim();
+      const path = new URL(raw.startsWith("//") ? `https:${raw}` : raw).pathname;
+      if (path !== "/" && /^\/[A-Za-z0-9._~%/-]{1,200}$/.test(path)) return path;
+    } catch {
+      // Not a URL: fall back to the route's own path.
+    }
+    return fallback;
+  }
+
+  function fillMessage(template, value, suggestion) {
+    const shown = Array.from(value.trim()).slice(0, 120).join("");
+    const args = [shown, homeHost, suggestion];
+    return (template || "").replace(/%(\d)\$s/g, (match, index) => args[Number(index) - 1] ?? match);
+  }
+
+  // final: true on leaving the field or toggling the route; false while typing,
+  // when only cross-site addresses (complete enough to judge) raise a hint.
+  function checkDestination(input, final) {
+    const route = input.closest("[data-sesamo-route]");
+    const hint = route ? route.querySelector("[data-sesamo-destination-hint]") : null;
+    if (!hint) return;
+    const enabled = route.querySelector("[data-sesamo-enabled]");
+    let problem = destinationProblem(input.value);
+    if (problem === "empty" && !(enabled && enabled.checked)) problem = "";
+    if (!final && problem !== "" && problem !== "other_site" && problem !== "other_scheme") {
+      if (hint.hidden) return;
+    }
+    if (problem === "") {
+      hint.hidden = true;
+      hint.textContent = "";
+      input.classList.remove("is-invalid");
+      input.removeAttribute("aria-invalid");
+      return;
+    }
+    hint.textContent = fillMessage(messages[problem], input.value, suggestedPath(input.value, input.dataset.sesamoFallback || "/secret/"));
+    hint.hidden = false;
+    input.classList.add("is-invalid");
+    input.setAttribute("aria-invalid", "true");
+  }
+
   function routeIsComplete(route) {
     const enabled = route.querySelector("[data-sesamo-enabled]");
     const destination = route.querySelector("[data-sesamo-destination]");
-    if (!enabled || !enabled.checked || !destination || destination.value.trim() === "") return false;
+    if (!enabled || !enabled.checked || !destination || destinationProblem(destination.value) !== "") return false;
     if (!route.matches("[data-sesamo-custom]")) return true;
     const name = route.querySelector("[data-sesamo-name]");
     const sequence = route.querySelector("[data-sesamo-sequence]");
@@ -237,18 +306,30 @@
   }
 
   root.querySelectorAll("[data-sesamo-custom]").forEach(bindRow);
-  root.addEventListener("change", updateStatus);
+  root.addEventListener("change", (event) => {
+    if (event.target.matches("[data-sesamo-destination]")) checkDestination(event.target, true);
+    if (event.target.matches("[data-sesamo-enabled]")) {
+      const route = event.target.closest("[data-sesamo-route]");
+      const destination = route ? route.querySelector("[data-sesamo-destination]") : null;
+      if (destination) checkDestination(destination, true);
+    }
+    updateStatus();
+  });
   root.addEventListener("input", (event) => {
+    if (event.target.matches("[data-sesamo-destination]")) checkDestination(event.target, false);
     if (event.target.matches("[data-sesamo-name], [data-sesamo-destination]")) updateStatus();
   });
   document.addEventListener("keydown", onRecorderKeydown, true);
-  const form = root.querySelector("form");
   if (form) form.addEventListener("submit", stopRecording);
 
   const presetCheckboxes = Array.from(root.querySelectorAll(".sesamo-preset [data-sesamo-enabled]"));
   const setAllPresets = (checked) => {
     presetCheckboxes.forEach((checkbox) => {
       checkbox.checked = checked;
+      // Clearing removes "add a destination" hints; selecting all stays quiet.
+      const route = checkbox.closest("[data-sesamo-route]");
+      const destination = route ? route.querySelector("[data-sesamo-destination]") : null;
+      if (destination && !checked) checkDestination(destination, true);
     });
     updateStatus();
     if (presetCheckboxes[0]) presetCheckboxes[0].focus();

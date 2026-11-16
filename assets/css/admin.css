@@ -280,6 +280,31 @@
 	box-sizing: border-box;
 }
 
+.sesamo-route-url.is-invalid,
+.sesamo-route-url.is-invalid:focus {
+	border-color: #d63638;
+	box-shadow: 0 0 0 1px #d63638;
+}
+
+.sesamo-field-hint {
+	display: block;
+	margin-top: 6px;
+	color: #8a2424;
+	font-size: 13px;
+	line-height: 1.45;
+	overflow-wrap: anywhere;
+	cursor: auto;
+}
+
+.sesamo-field-hint[hidden] {
+	display: none;
+}
+
+.sesamo-destination-help {
+	margin-top: 12px !important;
+	color: var(--sesamo-muted);
+}
+
 .sesamo-custom-list {
 	border: 1px solid var(--sesamo-border);
 	border-radius: 5px;
@@ -330,7 +355,7 @@
 }
 
 .sesamo-custom__name > span,
-.sesamo-custom__destination > span,
+.sesamo-custom__destination > label,
 .sesamo-custom__sequence > label {
 	color: var(--sesamo-ink);
 	font-size: 12px;

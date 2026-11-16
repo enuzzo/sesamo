@@ -9,6 +9,15 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 - WordPress integration, accessibility, RTL, and mobile-admin verification.
 - Official Plugin Check and WordPress.org readme validation.
 
+## 0.2.4 — 2026-11-16
+
+### Changed
+
+- A destination that cannot be used now gets a specific explanation on its own field, both while typing and after saving. An address on another website names the same-site path to enter (for example `/iddqd/`) and the redirect to create; a missing destination on an active combination says so; a mixed protocol or port is called out separately. One summary notice sits above the form.
+- Rejected destinations stay in their fields after saving instead of disappearing. They are kept for ten minutes in a per-user transient (`netmilk_sesamo_rejected_<user ID>`), read once, and never become a route.
+- The settings page states which host destinations must use, and the readme FAQ gives the redirect recipe for reaching another website.
+- The settings summary no longer counts an unusable destination as armed while editing.
+
 ## 0.2.3 — 2026-11-16
 
 ### Fixed

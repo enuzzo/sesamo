@@ -3,7 +3,7 @@ Tags: easter egg, konami code, secret page, keyboard sequence, redirect
 Requires at least: 6.3
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 0.2.3
+Stable tag: 0.2.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -48,9 +48,19 @@ Yes. Built-in presets and up to twenty custom combinations can be active, each w
 
 Use Add combination, give it a name, record 2–64 keys or enter whitespace-separated `KeyboardEvent.key` values, and choose a same-site destination. Conflicting prefixes, suffixes, and duplicates are saved disabled so routing stays deterministic.
 
-= Can I use an external destination? =
+= Can a combination open another website? =
 
-No. The door stays in this building. Sesamo restricts navigation to the current WordPress origin so a playful plugin does not become an external redirect surface.
+Not directly. The door stays in this building: Sesamo only navigates to pages on the current WordPress site, so a playful plugin does not become an open redirect. To send visitors to another website, take one extra step:
+
+1. In Sesamo, enter a path on this site as the destination, for example `/iddqd/`.
+2. Redirect that path to the other website with a redirect plugin (for example Redirection) or a server rule, for example `/iddqd/` to `https://other-site.example/iddqd/`. A temporary (302) redirect is easiest to change later.
+3. Open `/iddqd/` in a browser to check that it lands on the other website, then try the combination.
+
+If you type an address on another website, Sesamo does not save it, keeps it in the field, and shows the path to use and the redirect to create.
+
+= Why does my combination stay inactive? =
+
+A combination needs a destination on this site. The settings page marks any field it could not use and says what to enter. Clear the checkbox of any built-in combination you do not need.
 
 = Is the destination secret or protected? =
 
@@ -70,6 +80,11 @@ No. Sesamo has manners. Input, textarea, select, content-editable, repeated, com
 2. The responsive settings page on a narrow screen. Same controls, less elbow room, zero horizontal scroll.
 
 == Changelog ==
+
+= 0.2.4 =
+
+* Destinations that cannot be used now explain why, on the field itself: an address on another website gets the exact path to enter and the redirect to create. What you typed stays in the field instead of disappearing.
+* The settings page and the FAQ explain how to send a combination to another website with a redirect.
 
 = 0.2.3 =
 

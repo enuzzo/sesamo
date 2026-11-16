@@ -15,6 +15,7 @@ final class Settings {
 	public const SCHEMA_VERSION     = 2;
 	private const PAGE_SLUG         = 'sesamo';
 	private const GROUP             = 'netmilk_sesamo';
+	private const REJECTED_PREFIX   = 'netmilk_sesamo_rejected_';
 
 	/** Register admin hooks. */
 	public static function init(): void {
@@ -149,18 +150,14 @@ final class Settings {
 				continue;
 			}
 
-			$name = isset( $raw_custom['name'] ) && is_string( $raw_custom['name'] )
-				? self::limit_text( sanitize_text_field( $raw_custom['name'] ), 64 )
-				: '';
-			$sequence    = Combinations::normalize_sequence( $raw_custom['sequence'] ?? array() );
-			$destination = isset( $raw_custom['destination_url'] ) && is_string( $raw_custom['destination_url'] )
-				? self::normalize_destination( trim( $raw_custom['destination_url'] ) )
-				: '';
-			$requested_enabled = isset( $raw_custom['enabled'] ) && in_array( $raw_custom['enabled'], array( true, 1, '1', 'on' ), true );
-
-			if ( '' === $name && array() === $sequence && '' === $destination && ! $requested_enabled ) {
+			$fields = self::custom_fields( $raw_custom );
+			if ( self::custom_fields_empty( $fields ) ) {
 				continue;
 			}
+			$name              = $fields['name'];
+			$sequence          = $fields['sequence'];
+			$destination       = $fields['destination'];
+			$requested_enabled = $fields['requested_enabled'];
 
 			$id = isset( $raw_custom['id'] ) && is_string( $raw_custom['id'] ) ? sanitize_key( $raw_custom['id'] ) : '';
 			if ( 1 !== preg_match( '/^custom_[a-z0-9]{8,40}$/', $id ) || isset( $used_ids[ $id ] ) ) {
@@ -213,7 +210,12 @@ final class Settings {
 		$raw        = is_array( $input ) ? self::unslash_form_input( $input ) : array();
 		$normalized = self::normalize( $raw );
 
-		self::validate_preset_destinations( $raw, $normalized );
+		// update_option() sanitizes the already-stored shape again when it creates the option.
+		// The settings form never posts these two keys, so only report on real form input.
+		$is_stored_shape = array_key_exists( 'schema_version', $raw ) && array_key_exists( 'destination_url', $raw );
+		if ( ! $is_stored_shape ) {
+			self::report_destinations( $raw, $normalized );
+		}
 		self::validate_customs( $raw, $normalized );
 
 		if ( isset( $raw['max_pause'] ) && is_scalar( $raw['max_pause'] ) ) {
@@ -280,6 +282,7 @@ final class Settings {
 		$settings     = self::get();
 		$presets      = Presets::all();
 		$active_count = count( self::public_combinations( $settings ) );
+		$rejected     = self::take_rejected();
 		$custom_rows  = $settings['custom_combinations'];
 		if ( count( $custom_rows ) < Combinations::MAX_CUSTOM ) {
 			$custom_rows[] = self::blank_custom();
@@ -308,7 +311,8 @@ final class Settings {
 			<?php // WordPress prints settings notices on Settings screens and moves them here. ?>
 			<hr class="wp-header-end" />
 
-			<form action="options.php" method="post">
+			<?php $templates = self::destination_templates(); ?>
+			<form action="options.php" method="post" data-sesamo-home="<?php echo esc_attr( self::home_origin() ); ?>" data-sesamo-host="<?php echo esc_attr( self::home_label() ); ?>" data-msg-other-site="<?php echo esc_attr( $templates['other_site'] ); ?>" data-msg-other-scheme="<?php echo esc_attr( $templates['other_scheme'] ); ?>" data-msg-invalid="<?php echo esc_attr( $templates['invalid'] ); ?>" data-msg-empty="<?php echo esc_attr( $templates['empty'] ); ?>">
 				<?php settings_fields( self::GROUP ); ?>
 
 				<section class="sesamo-panel" aria-labelledby="sesamo-built-ins-heading">
@@ -347,13 +351,32 @@ final class Settings {
 								<span class="sesamo-keycaps" aria-label="<?php echo esc_attr( self::accessible_sequence( $preset['sequence'] ) ); ?>">
 									<?php self::render_keycaps( $preset['sequence'] ); ?>
 								</span>
+								<?php
+								$fallback  = '/' . $id . '/';
+								$kept      = isset( $rejected['preset'][ $id ] ) && ! isset( $settings['preset_destinations'][ $id ] ) ? $rejected['preset'][ $id ] : null;
+								$problem   = null === $kept ? '' : self::destination_problem( $kept );
+								$hint      = '' === $problem ? '' : self::destination_message( $problem, $kept, self::suggested_path( $kept, $fallback ) );
+								$hint_id   = 'sesamo-hint-' . $id;
+								?>
 								<span class="sesamo-preset__destination">
 									<?php /* translators: %s is a built-in sequence name. */ ?>
-									<input class="regular-text code sesamo-route-url" name="<?php echo esc_attr( self::OPTION_NAME ); ?>[preset_destinations][<?php echo esc_attr( $id ); ?>]" type="text" inputmode="url" value="<?php echo esc_attr( $settings['preset_destinations'][ $id ] ?? '' ); ?>" placeholder="/secret/" aria-label="<?php echo esc_attr( sprintf( __( '%s destination', 'sesamo' ), $preset['label'] ) ); ?>" data-sesamo-destination />
+									<input class="regular-text code sesamo-route-url<?php echo '' === $problem ? '' : ' is-invalid'; ?>" name="<?php echo esc_attr( self::OPTION_NAME ); ?>[preset_destinations][<?php echo esc_attr( $id ); ?>]" type="text" inputmode="url" value="<?php echo esc_attr( null === $kept ? ( $settings['preset_destinations'][ $id ] ?? '' ) : $kept ); ?>" placeholder="/secret/" aria-label="<?php echo esc_attr( sprintf( __( '%s destination', 'sesamo' ), $preset['label'] ) ); ?>" aria-describedby="<?php echo esc_attr( $hint_id . ' sesamo-destination-help' ); ?>"<?php echo '' === $problem ? '' : ' aria-invalid="true"'; ?> data-sesamo-destination data-sesamo-fallback="<?php echo esc_attr( $fallback ); ?>" />
+									<span class="sesamo-field-hint" id="<?php echo esc_attr( $hint_id ); ?>" data-sesamo-destination-hint<?php echo '' === $hint ? ' hidden' : ''; ?>><?php echo esc_html( $hint ); ?></span>
 								</span>
 							</div>
 						<?php endforeach; ?>
 					</fieldset>
+					<p class="description sesamo-destination-help" id="sesamo-destination-help">
+						<?php
+						echo esc_html(
+							sprintf(
+								/* translators: %s is this site's host name, for example example.com. */
+								__( 'Destinations are pages on %s: enter a path such as /secret/. To send visitors to another website, enter a path here and redirect it there with a redirect plugin or a server rule.', 'sesamo' ),
+								self::home_label()
+							)
+						);
+						?>
+					</p>
 				</section>
 
 				<section class="sesamo-panel" aria-labelledby="sesamo-custom-heading">
@@ -366,7 +389,7 @@ final class Settings {
 
 					<div class="sesamo-custom-list" data-sesamo-custom-list data-max="<?php echo esc_attr( (string) Combinations::MAX_CUSTOM ); ?>">
 						<?php foreach ( $custom_rows as $index => $custom ) : ?>
-							<?php self::render_custom_row( $custom, (string) $index ); ?>
+							<?php self::render_custom_row( $custom, (string) $index, '' === $custom['destination_url'] ? ( $rejected['custom'][ $custom['id'] ] ?? null ) : null ); ?>
 						<?php endforeach; ?>
 					</div>
 					<template data-sesamo-custom-template><?php self::render_custom_row( self::blank_custom(), '__INDEX__' ); ?></template>
@@ -412,9 +435,12 @@ final class Settings {
 	}
 
 	/** Render one custom-combination editor row. */
-	private static function render_custom_row( array $custom, string $index ): void {
-		$prefix = self::OPTION_NAME . '[custom_combinations][' . $index . ']';
-		$row_id = 'sesamo-custom-' . $index;
+	private static function render_custom_row( array $custom, string $index, ?string $kept = null ): void {
+		$prefix  = self::OPTION_NAME . '[custom_combinations][' . $index . ']';
+		$row_id  = 'sesamo-custom-' . $index;
+		$problem = null === $kept ? '' : self::destination_problem( $kept );
+		$hint    = '' === $problem ? '' : self::destination_message( $problem, $kept, self::suggested_path( $kept, '/secret/' ) );
+		$hint_id = $row_id . '-destination-hint';
 		?>
 		<fieldset class="sesamo-custom" data-sesamo-custom data-sesamo-route>
 			<legend class="screen-reader-text"><?php esc_html_e( 'Custom combination', 'sesamo' ); ?></legend>
@@ -436,10 +462,11 @@ final class Settings {
 					<button class="button-link" type="button" data-sesamo-clear-sequence><?php esc_html_e( 'Clear', 'sesamo' ); ?></button>
 				</div>
 			</div>
-			<label class="sesamo-custom__destination" for="<?php echo esc_attr( $row_id . '-destination' ); ?>">
-				<span><?php esc_html_e( 'Destination URL', 'sesamo' ); ?></span>
-				<input class="code sesamo-route-url" id="<?php echo esc_attr( $row_id . '-destination' ); ?>" name="<?php echo esc_attr( $prefix ); ?>[destination_url]" type="text" inputmode="url" value="<?php echo esc_attr( $custom['destination_url'] ); ?>" placeholder="/secret/" data-sesamo-destination />
-			</label>
+			<div class="sesamo-custom__destination">
+				<label for="<?php echo esc_attr( $row_id . '-destination' ); ?>"><?php esc_html_e( 'Destination URL', 'sesamo' ); ?></label>
+				<input class="code sesamo-route-url<?php echo '' === $problem ? '' : ' is-invalid'; ?>" id="<?php echo esc_attr( $row_id . '-destination' ); ?>" name="<?php echo esc_attr( $prefix ); ?>[destination_url]" type="text" inputmode="url" value="<?php echo esc_attr( null === $kept ? $custom['destination_url'] : $kept ); ?>" placeholder="/secret/" aria-describedby="<?php echo esc_attr( $hint_id . ' sesamo-destination-help' ); ?>"<?php echo '' === $problem ? '' : ' aria-invalid="true"'; ?> data-sesamo-destination data-sesamo-fallback="/secret/" />
+				<span class="sesamo-field-hint" id="<?php echo esc_attr( $hint_id ); ?>" data-sesamo-destination-hint<?php echo '' === $hint ? ' hidden' : ''; ?>><?php echo esc_html( $hint ); ?></span>
+			</div>
 			<button class="button-link-delete sesamo-custom__remove" type="button" data-sesamo-remove><?php esc_html_e( 'Remove', 'sesamo' ); ?></button>
 		</fieldset>
 		<?php
@@ -500,19 +527,208 @@ final class Settings {
 		return $input;
 	}
 
-	/** Add one warning when an enabled built-in has no safe destination. */
-	private static function validate_preset_destinations( array $raw, array $normalized ): void {
-		$requested = isset( $raw['enabled_presets'] ) && is_array( $raw['enabled_presets'] ) ? $raw['enabled_presets'] : array();
-		foreach ( $requested as $id ) {
-			if ( ! is_string( $id ) ) {
+	/**
+	 * Explain every destination that could not be saved and keep what was typed.
+	 *
+	 * The typed values live for ten minutes in a per-user transient, so the next
+	 * screen can show them in their fields with a hint instead of an empty box.
+	 */
+	private static function report_destinations( array $raw, array $normalized ): void {
+		$rejected  = array(
+			'preset' => array(),
+			'custom' => array(),
+		);
+		$requested = isset( $raw['enabled_presets'] ) && is_array( $raw['enabled_presets'] ) ? array_map( 'sanitize_key', array_filter( $raw['enabled_presets'], 'is_string' ) ) : array();
+		$raw_destinations = isset( $raw['preset_destinations'] ) && is_array( $raw['preset_destinations'] ) ? $raw['preset_destinations'] : array();
+		$problems  = array();
+
+		foreach ( array_keys( Presets::all() ) as $id ) {
+			if ( isset( $normalized['preset_destinations'][ $id ] ) ) {
 				continue;
 			}
-			$id = sanitize_key( $id );
-			if ( ! isset( $normalized['preset_destinations'][ $id ] ) ) {
-				self::add_notice( 'invalid_preset_destination', __( 'Every active built-in combination needs an HTTP(S) destination on this WordPress site. Invalid routes were left inactive.', 'sesamo' ), 'error' );
-				return;
+			$value = isset( $raw_destinations[ $id ] ) && is_string( $raw_destinations[ $id ] ) ? trim( $raw_destinations[ $id ] ) : '';
+			if ( '' !== $value || in_array( $id, $requested, true ) ) {
+				$rejected['preset'][ $id ] = self::limit_text( $value, 2048 );
+				$problems[]                = self::destination_problem( $value );
 			}
 		}
+
+		$raw_customs = isset( $raw['custom_combinations'] ) && is_array( $raw['custom_combinations'] )
+			? array_slice( array_values( $raw['custom_combinations'] ), 0, Combinations::MAX_CUSTOM )
+			: array();
+		$kept    = $normalized['custom_combinations'];
+		$pointer = 0;
+		foreach ( $raw_customs as $raw_custom ) {
+			if ( ! is_array( $raw_custom ) ) {
+				continue;
+			}
+			$fields = self::custom_fields( $raw_custom );
+			if ( self::custom_fields_empty( $fields ) ) {
+				continue;
+			}
+			$custom = $kept[ $pointer ] ?? null;
+			++$pointer;
+			if ( null === $custom || '' !== $custom['destination_url'] ) {
+				continue;
+			}
+			$value = isset( $raw_custom['destination_url'] ) && is_string( $raw_custom['destination_url'] ) ? trim( $raw_custom['destination_url'] ) : '';
+			if ( '' !== $value || $fields['requested_enabled'] ) {
+				$rejected['custom'][ $custom['id'] ] = self::limit_text( $value, 2048 );
+				$problems[]                          = self::destination_problem( $value );
+			}
+		}
+
+		if ( in_array( 'other_site', $problems, true ) ) {
+			self::add_notice(
+				'other_site_destination',
+				esc_html(
+					sprintf(
+						/* translators: %s is this site's host name, for example example.com. */
+						__( 'Destinations on another website were not saved: Sesamo only opens pages on %s. To send visitors to another website, point the combination to a path on this site and redirect that path with a redirect plugin or a server rule. The highlighted fields show exactly what to enter.', 'sesamo' ),
+						self::home_label()
+					)
+				),
+				'error'
+			);
+		}
+		if ( array() !== array_diff( $problems, array( 'other_site' ) ) ) {
+			self::add_notice( 'unusable_destination', esc_html__( 'Some destinations are missing or cannot be used, so those combinations were left inactive. The highlighted fields say what to change.', 'sesamo' ), 'error' );
+		}
+
+		$user_id = get_current_user_id();
+		if ( $user_id > 0 ) {
+			if ( array() === $rejected['preset'] && array() === $rejected['custom'] ) {
+				delete_transient( self::REJECTED_PREFIX . $user_id );
+			} else {
+				set_transient( self::REJECTED_PREFIX . $user_id, $rejected, 10 * MINUTE_IN_SECONDS );
+			}
+		}
+	}
+
+	/** Read and forget the destinations rejected by the current user's last save. */
+	private static function take_rejected(): array {
+		$rejected = array(
+			'preset' => array(),
+			'custom' => array(),
+		);
+		$user_id = get_current_user_id();
+		if ( $user_id <= 0 ) {
+			return $rejected;
+		}
+		$stored = get_transient( self::REJECTED_PREFIX . $user_id );
+		delete_transient( self::REJECTED_PREFIX . $user_id );
+		if ( ! is_array( $stored ) ) {
+			return $rejected;
+		}
+		foreach ( array_keys( $rejected ) as $group ) {
+			if ( ! isset( $stored[ $group ] ) || ! is_array( $stored[ $group ] ) ) {
+				continue;
+			}
+			foreach ( array_slice( $stored[ $group ], 0, Combinations::MAX_CUSTOM + count( Presets::all() ), true ) as $id => $value ) {
+				if ( is_string( $id ) && is_string( $value ) ) {
+					$rejected[ $group ][ sanitize_key( $id ) ] = self::limit_text( $value, 2048 );
+				}
+			}
+		}
+		return $rejected;
+	}
+
+	/**
+	 * Classify a typed destination.
+	 *
+	 * Returns '' when it is usable, or one of: empty, other_site, other_scheme, invalid.
+	 */
+	public static function destination_problem( string $raw ): string {
+		$raw = trim( $raw );
+		if ( '' === $raw ) {
+			return 'empty';
+		}
+		if ( '' !== self::normalize_destination( $raw ) ) {
+			return '';
+		}
+		if ( strlen( $raw ) > 2048 ) {
+			return 'invalid';
+		}
+		$parts  = wp_parse_url( 0 === strpos( $raw, '//' ) ? 'https:' . $raw : $raw );
+		$scheme = is_array( $parts ) && isset( $parts['scheme'] ) ? strtolower( $parts['scheme'] ) : '';
+		$host   = is_array( $parts ) && isset( $parts['host'] ) ? strtolower( $parts['host'] ) : '';
+		if ( ! in_array( $scheme, array( 'http', 'https' ), true ) || '' === $host || isset( $parts['user'] ) || isset( $parts['pass'] ) ) {
+			return 'invalid';
+		}
+		$home = wp_parse_url( home_url( '/' ) );
+		$home_host = is_array( $home ) && isset( $home['host'] ) ? strtolower( $home['host'] ) : '';
+		return $host === $home_host ? 'other_scheme' : 'other_site';
+	}
+
+	/** Suggest a same-site path for a rejected destination. */
+	public static function suggested_path( string $raw, string $fallback ): string {
+		$raw   = trim( $raw );
+		$parts = wp_parse_url( 0 === strpos( $raw, '//' ) ? 'https:' . $raw : $raw );
+		$path  = is_array( $parts ) && isset( $parts['path'] ) ? (string) $parts['path'] : '';
+		if ( '/' !== $path && 1 === preg_match( '#^/[A-Za-z0-9._~%/-]{1,200}$#', $path ) ) {
+			return $path;
+		}
+		return $fallback;
+	}
+
+	/** Message templates shared by the save-time hints and the live admin hints. */
+	private static function destination_templates(): array {
+		return array(
+			/* translators: 1: the rejected address, 2: this site's host name, 3: a suggested path such as /secret/. */
+			'other_site'   => __( '%1$s is on another website, and Sesamo only opens pages on %2$s. Enter a path on this site instead, such as %3$s, then redirect %3$s to %1$s with a redirect plugin or a server rule.', 'sesamo' ),
+			/* translators: 1: the rejected address, 2: this site's host name, 3: a suggested path such as /secret/. */
+			'other_scheme' => __( '%1$s uses a different protocol or port than %2$s. Enter a path instead, such as %3$s.', 'sesamo' ),
+			/* translators: 1: the rejected address, 2: this site's host name, 3: a suggested path such as /secret/. */
+			'invalid'      => __( 'Sesamo cannot use this destination. Enter a path such as %3$s, or a full address on %2$s.', 'sesamo' ),
+			/* translators: 1: the rejected address, 2: this site's host name, 3: a suggested path such as /secret/. */
+			'empty'        => __( 'Add a destination, such as %3$s, or switch this combination off.', 'sesamo' ),
+		);
+	}
+
+	/** Return the plain-text hint for a destination problem. Escape on output. */
+	public static function destination_message( string $problem, string $raw, string $suggestion ): string {
+		$templates = self::destination_templates();
+		if ( ! isset( $templates[ $problem ] ) ) {
+			return '';
+		}
+		return sprintf( $templates[ $problem ], self::limit_text( trim( $raw ), 120 ), self::home_label(), $suggestion );
+	}
+
+	/** Return this site's host, with the port when it is not the default. */
+	private static function home_label(): string {
+		$home = wp_parse_url( home_url( '/' ) );
+		$host = is_array( $home ) && isset( $home['host'] ) ? strtolower( $home['host'] ) : '';
+		if ( '' !== $host && isset( $home['port'] ) ) {
+			$host .= ':' . (int) $home['port'];
+		}
+		return $host;
+	}
+
+	/** Return this site's origin for the live admin check. */
+	private static function home_origin(): string {
+		$home   = wp_parse_url( home_url( '/' ) );
+		$scheme = is_array( $home ) && isset( $home['scheme'] ) ? strtolower( $home['scheme'] ) : '';
+		$host   = self::home_label();
+		return in_array( $scheme, array( 'http', 'https' ), true ) && '' !== $host ? $scheme . '://' . $host : '';
+	}
+
+	/** Parse one raw custom row the same way for storage and for feedback. */
+	private static function custom_fields( array $raw_custom ): array {
+		return array(
+			'name'              => isset( $raw_custom['name'] ) && is_string( $raw_custom['name'] )
+				? self::limit_text( sanitize_text_field( $raw_custom['name'] ), 64 )
+				: '',
+			'sequence'          => Combinations::normalize_sequence( $raw_custom['sequence'] ?? array() ),
+			'destination'       => isset( $raw_custom['destination_url'] ) && is_string( $raw_custom['destination_url'] )
+				? self::normalize_destination( trim( $raw_custom['destination_url'] ) )
+				: '',
+			'requested_enabled' => isset( $raw_custom['enabled'] ) && in_array( $raw_custom['enabled'], array( true, 1, '1', 'on' ), true ),
+		);
+	}
+
+	/** Whether a parsed custom row carries nothing worth keeping. */
+	private static function custom_fields_empty( array $fields ): bool {
+		return '' === $fields['name'] && array() === $fields['sequence'] && '' === $fields['destination'] && ! $fields['requested_enabled'];
 	}
 
 	/** Add bounded, non-sensitive validation feedback for custom rows. */
