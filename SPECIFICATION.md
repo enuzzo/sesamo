@@ -17,7 +17,7 @@ The plugin adds **Settings → Sesamo** for users with `manage_options` and prov
 1. a multiple-choice list from the canonical preset registry, with one destination per preset;
 2. up to twenty custom combinations, each with a name, enabled state, 2–64 key tokens, stable ID, and destination;
 3. an accessible key recorder plus editable whitespace-separated `KeyboardEvent.key` input;
-4. same-origin HTTP(S) destination enforcement for every route;
+4. same-origin HTTP(S) destination enforcement for every route, with a per-field explanation of every rejected destination (missing, unusable, other protocol or port, or another website, which names the same-site path and redirect to use instead) and the rejected text kept in its field after saving;
 5. duplicate, prefix, and suffix collision detection;
 6. a maximum inter-key pause from 250 to 5,000 milliseconds;
 7. Settings API nonce and capability protection;
@@ -80,7 +80,7 @@ One option named `netmilk_sesamo_settings`:
 }
 ```
 
-`destination_url` is a temporary 0.1 rollback bridge and is not used by the 0.2 frontend. Activation migrates the pre-release `konami_code_activator_settings` option when present. Schema-1 settings are upgraded on activation or the next admin request by copying the former shared destination to every enabled preset. Uninstall deletes both option names. No custom tables or personal data are created.
+`destination_url` is a temporary 0.1 rollback bridge and is not used by the 0.2 frontend. Activation migrates the pre-release `konami_code_activator_settings` option when present. Schema-1 settings are upgraded on activation or the next admin request by copying the former shared destination to every enabled preset. Uninstall deletes both option names. No custom tables or personal data are created. After a save that rejects destinations, the typed values are kept for ten minutes in the per-user transient `netmilk_sesamo_rejected_<user ID>`, read and deleted by the next settings screen, and never used as routes.
 
 ## Compatibility and acceptance
 

@@ -6,7 +6,9 @@ The short list future maintainers should read before making Sesamo “more flexi
 
 - A secret sequence hides discoverability in the UI; it does not protect content. The destination is visible in page source/devtools.
 - Hidden pages may still appear in search, sitemaps, archives, feeds, logs, caches, analytics, referrers from later navigation, or WordPress REST responses.
-- Sesamo deliberately requires a same-origin URL. Relaxing this turns an easter egg into an administrator-configured outbound redirect and needs a new threat review.
+- Sesamo deliberately requires a same-origin URL. Relaxing this turns an easter egg into an administrator-configured outbound redirect and needs a new threat review. The supported way to reach another website is a same-site path plus a redirect rule on the site; the settings page explains it on the field when someone types an external address.
+- `settings_errors()` prints notice messages without escaping. Escape every dynamic part before `add_settings_error()`.
+- WordPress prints settings notices on Settings screens itself and moves them after `.wp-header-end`. Do not print them again, and keep the `wp-header-end` marker after the header.
 - Physical keyboards are the 0.1 input surface. Mobile/touch visitors need another path provided by the site.
 
 ## Keyboard behavior

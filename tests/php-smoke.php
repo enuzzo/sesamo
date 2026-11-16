@@ -48,6 +48,34 @@ function get_settings_errors( $setting = '' ) {
 	return array_values( array_filter( $errors, static function ( $error ) use ( $setting ) { return $error['setting'] === $setting; } ) );
 }
 
+function esc_html( $text ) {
+	return htmlspecialchars( (string) $text, ENT_QUOTES );
+}
+
+function esc_html__( $text ) {
+	return esc_html( $text );
+}
+
+define( 'MINUTE_IN_SECONDS', 60 );
+
+function get_current_user_id() {
+	return 7;
+}
+
+function set_transient( $key, $value, $expiration = 0 ) {
+	$GLOBALS['sesamo_transients'][ $key ] = $value;
+	return true;
+}
+
+function get_transient( $key ) {
+	return $GLOBALS['sesamo_transients'][ $key ] ?? false;
+}
+
+function delete_transient( $key ) {
+	unset( $GLOBALS['sesamo_transients'][ $key ] );
+	return true;
+}
+
 function absint( $value ) {
 	return abs( (int) $value );
 }
@@ -162,17 +190,58 @@ sesamo_assert( ! isset( $invalid_route['preset_destinations']['konami'] ), 'An e
 sesamo_assert( array() === Settings::public_combinations( $invalid_route ), 'No valid route means no public detector configuration.' );
 sesamo_assert( 250 === $invalid_route['max_pause'], 'Timeout is clamped to the minimum.' );
 
-// update_option() runs the sanitize callback twice when the option is first created.
+// Destination feedback: explain cross-site rejections and keep what the administrator typed.
+sesamo_assert( '' === Settings::destination_problem( '/secret/' ), 'Same-site paths are usable.' );
+sesamo_assert( '' === Settings::destination_problem( 'https://example.test/secret/' ), 'Same-site URLs are usable.' );
+sesamo_assert( 'empty' === Settings::destination_problem( '  ' ), 'Blank destinations are reported as empty.' );
+sesamo_assert( 'other_site' === Settings::destination_problem( 'https://pharma.example/iddqd/' ), 'Another host is reported as another website.' );
+sesamo_assert( 'other_site' === Settings::destination_problem( '//pharma.example/iddqd/' ), 'Protocol-relative hosts are reported as another website.' );
+sesamo_assert( 'other_scheme' === Settings::destination_problem( 'http://example.test/secret/' ), 'A different scheme on this host is reported as such.' );
+sesamo_assert( 'invalid' === Settings::destination_problem( 'javascript:alert(1)' ), 'Script URLs are unusable, not another website.' );
+sesamo_assert( 'invalid' === Settings::destination_problem( 'secret' ), 'Bare words are unusable.' );
+sesamo_assert( '/iddqd/' === Settings::suggested_path( 'https://pharma.example/iddqd/', '/fallback/' ), 'The suggestion reuses the external path.' );
+sesamo_assert( '/fallback/' === Settings::suggested_path( 'https://pharma.example/', '/fallback/' ), 'A bare external host falls back to a route path.' );
+sesamo_assert( '/fallback/' === Settings::suggested_path( 'https://pharma.example/<b>/', '/fallback/' ), 'Unsafe external paths are never suggested.' );
+
 $GLOBALS['sesamo_test_errors'] = array();
-$cross_origin = array(
-	'schema_version'      => 2,
-	'enabled_presets'     => array( 'konami' ),
-	'preset_destinations' => array( 'konami' => 'https://other.example/konami/' ),
+$GLOBALS['sesamo_transients']  = array();
+// Mirrors the settings form: no schema_version, every preset destination posted.
+$form_post = array(
+	'enabled_presets'     => array( 'konami', 'iddqd' ),
+	'preset_destinations' => array(
+		'konami' => '',
+		'iddqd'  => 'https://pharma.example/iddqd/',
+		'idkfa'  => 'https://pharma.example/idkfa/',
+	),
+	'custom_combinations' => array(
+		array( 'name' => 'Vault', 'sequence' => 'v a u l t', 'destination_url' => 'https://pharma.example/vault/', 'enabled' => '1' ),
+	),
 );
-Settings::sanitize( $cross_origin );
-Settings::sanitize( Settings::sanitize( $cross_origin ) );
-$repeat_codes = array_column( $GLOBALS['sesamo_test_errors'], 'code' );
-sesamo_assert( array( 'invalid_preset_destination' ) === $repeat_codes, 'Repeated sanitize passes register each notice once.' );
+$first_pass = Settings::sanitize( $form_post );
+// update_option() sanitizes the stored value a second time when it creates the option.
+Settings::sanitize( $first_pass );
+$codes = array_column( $GLOBALS['sesamo_test_errors'], 'code' );
+sesamo_assert( 1 === count( array_keys( $codes, 'other_site_destination', true ) ), 'Cross-site destinations register one summary notice.' );
+sesamo_assert( count( $codes ) === count( array_unique( $codes ) ), 'Repeated sanitize passes register each notice once.' );
+$summary = $GLOBALS['sesamo_test_errors'][ array_search( 'other_site_destination', $codes, true ) ]['message'];
+sesamo_assert( false !== strpos( $summary, 'example.test' ), 'The summary names the site Sesamo can open.' );
+sesamo_assert( false !== strpos( $summary, 'redirect' ), 'The summary explains the redirect route.' );
+
+$rejected = $GLOBALS['sesamo_transients']['netmilk_sesamo_rejected_7'] ?? null;
+sesamo_assert( is_array( $rejected ), 'Rejected destinations are kept for the next screen.' );
+sesamo_assert( 'https://pharma.example/iddqd/' === $rejected['preset']['iddqd'], 'An enabled cross-site preset keeps its typed value.' );
+sesamo_assert( 'https://pharma.example/idkfa/' === $rejected['preset']['idkfa'], 'A disabled preset keeps its typed value too.' );
+sesamo_assert( '' === $rejected['preset']['konami'], 'An enabled preset without a destination is flagged.' );
+sesamo_assert( 'https://pharma.example/vault/' === $rejected['custom'][ $first_pass['custom_combinations'][0]['id'] ], 'A custom row keeps its typed value under its stable ID.' );
+
+$hint = Settings::destination_message( 'other_site', 'https://pharma.example/iddqd/', '/iddqd/' );
+sesamo_assert( false !== strpos( $hint, '/iddqd/' ) && false !== strpos( $hint, 'https://pharma.example/iddqd/' ) && false !== strpos( $hint, 'example.test' ), 'The field hint gives the exact path and redirect target.' );
+sesamo_assert( '' !== Settings::destination_message( 'empty', '', '/secret/' ), 'Empty destinations get a hint.' );
+sesamo_assert( '' !== Settings::destination_message( 'invalid', 'secret', '/secret/' ), 'Unusable destinations get a hint.' );
+
+$GLOBALS['sesamo_transients'] = array();
+Settings::sanitize( array( 'enabled_presets' => array( 'konami' ), 'preset_destinations' => array( 'konami' => '/konami/' ) ) );
+sesamo_assert( ! isset( $GLOBALS['sesamo_transients']['netmilk_sesamo_rejected_7'] ), 'A clean save keeps nothing.' );
 sesamo_assert( array() === Settings::public_combinations( Settings::normalize( array( 'schema_version' => 2, 'enabled_presets' => array( 'konami' ), 'preset_destinations' => array( 'konami' => 'https://example.test/' . str_repeat( 'x', 3000 ) ) ) ) ), 'Oversized destinations fail closed.' );
 
 $malformed = Settings::normalize(
