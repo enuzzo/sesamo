@@ -4,8 +4,8 @@ Read `SPECIFICATION.md`, `ARCHITECTURE.md`, `SECURITY.md`, `docs/GOTCHAS.md`, an
 
 ## Workspace discipline
 
-- Perform all Sesamo work inside the primary Dropbox checkout at `~/Library/CloudStorage/Dropbox/Mitnick/sesamo`; do not use Codex-managed worktrees or alternate clones.
-- Before handoff, return the Dropbox checkout to `main`, fast-forward it to `origin/main`, and verify that the worktree is clean.
+- Perform all Sesamo work inside the primary checkout at `~/Documents/Mitnick/sesamo` on local disk; do not use Codex-managed worktrees or alternate clones. The repo no longer lives in Dropbox: history travels between Macs through GitHub only.
+- Before handoff, return the checkout to `main`, fast-forward it to `origin/main`, and verify that the worktree is clean.
 
 ## Project invariants
 
