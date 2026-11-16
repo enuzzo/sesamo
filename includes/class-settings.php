@@ -219,7 +219,7 @@ final class Settings {
 		if ( isset( $raw['max_pause'] ) && is_scalar( $raw['max_pause'] ) ) {
 			$requested_pause = absint( $raw['max_pause'] );
 			if ( $requested_pause < 250 || $requested_pause > 5000 ) {
-				add_settings_error( self::OPTION_NAME, 'adjusted_pause', __( 'Maximum pause was adjusted to the supported 250–5,000 ms range.', 'sesamo' ), 'warning' );
+				self::add_notice( 'adjusted_pause', __( 'Maximum pause was adjusted to the supported 250–5,000 ms range.', 'sesamo' ), 'warning' );
 			}
 		}
 
@@ -280,7 +280,6 @@ final class Settings {
 		$settings     = self::get();
 		$presets      = Presets::all();
 		$active_count = count( self::public_combinations( $settings ) );
-		$errors       = get_settings_errors( self::OPTION_NAME );
 		$custom_rows  = $settings['custom_combinations'];
 		if ( count( $custom_rows ) < Combinations::MAX_CUSTOM ) {
 			$custom_rows[] = self::blank_custom();
@@ -306,10 +305,8 @@ final class Settings {
 					</span>
 				</div>
 			</header>
-
-			<?php foreach ( $errors as $error ) : ?>
-				<div class="notice notice-<?php echo esc_attr( 'warning' === $error['type'] ? 'warning' : 'error' ); ?> is-dismissible"><p><?php echo esc_html( $error['message'] ); ?></p></div>
-			<?php endforeach; ?>
+			<?php // WordPress prints settings notices on Settings screens and moves them here. ?>
+			<hr class="wp-header-end" />
 
 			<form action="options.php" method="post">
 				<?php settings_fields( self::GROUP ); ?>
@@ -512,7 +509,7 @@ final class Settings {
 			}
 			$id = sanitize_key( $id );
 			if ( ! isset( $normalized['preset_destinations'][ $id ] ) ) {
-				add_settings_error( self::OPTION_NAME, 'invalid_preset_destination', __( 'Every active built-in combination needs an HTTP(S) destination on this WordPress site. Invalid routes were left inactive.', 'sesamo' ), 'error' );
+				self::add_notice( 'invalid_preset_destination', __( 'Every active built-in combination needs an HTTP(S) destination on this WordPress site. Invalid routes were left inactive.', 'sesamo' ), 'error' );
 				return;
 			}
 		}
@@ -522,7 +519,7 @@ final class Settings {
 	private static function validate_customs( array $raw, array $normalized ): void {
 		$customs = isset( $raw['custom_combinations'] ) && is_array( $raw['custom_combinations'] ) ? array_values( $raw['custom_combinations'] ) : array();
 		if ( count( $customs ) > Combinations::MAX_CUSTOM ) {
-			add_settings_error( self::OPTION_NAME, 'too_many_customs', sprintf( __( 'Only the first %d custom combinations were saved.', 'sesamo' ), Combinations::MAX_CUSTOM ), 'warning' );
+			self::add_notice( 'too_many_customs', sprintf( __( 'Only the first %d custom combinations were saved.', 'sesamo' ), Combinations::MAX_CUSTOM ), 'warning' );
 		}
 
 		$presets = Presets::all();
@@ -562,11 +559,26 @@ final class Settings {
 		}
 
 		if ( $invalid ) {
-			add_settings_error( self::OPTION_NAME, 'invalid_custom', __( 'Incomplete or invalid custom combinations were saved disabled. Add a name, 2–64 supported keys, and a same-site destination.', 'sesamo' ), 'error' );
+			self::add_notice( 'invalid_custom', __( 'Incomplete or invalid custom combinations were saved disabled. Add a name, 2–64 supported keys, and a same-site destination.', 'sesamo' ), 'error' );
 		}
 		if ( $duplicate ) {
-			add_settings_error( self::OPTION_NAME, 'duplicate_custom', __( 'A conflicting active sequence was saved disabled. Active combinations cannot duplicate, prefix, or suffix one another.', 'sesamo' ), 'warning' );
+			self::add_notice( 'duplicate_custom', __( 'A conflicting active sequence was saved disabled. Active combinations cannot duplicate, prefix, or suffix one another.', 'sesamo' ), 'warning' );
 		}
+	}
+
+	/**
+	 * Register a settings notice once per request.
+	 *
+	 * update_option() runs the sanitize callback a second time when it has to
+	 * create the option, so the same notice would otherwise appear twice.
+	 */
+	private static function add_notice( string $code, string $message, string $type ): void {
+		foreach ( get_settings_errors( self::OPTION_NAME ) as $error ) {
+			if ( isset( $error['code'] ) && $code === $error['code'] ) {
+				return;
+			}
+		}
+		add_settings_error( self::OPTION_NAME, $code, $message, $type );
 	}
 
 	/** Return a same-origin HTTP(S) URL or an empty string. */

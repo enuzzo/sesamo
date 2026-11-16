@@ -9,6 +9,12 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 - WordPress integration, accessibility, RTL, and mobile-admin verification.
 - Official Plugin Check and WordPress.org readme validation.
 
+## 0.2.3 — 2026-11-16
+
+### Fixed
+
+- Settings notices (for example a rejected cross-site destination) appeared up to four times and were squeezed into the settings header. Sesamo now registers each notice once per save, leaves printing to WordPress, and marks the end of its header with `wp-header-end` so notices sit below it.
+
 ## 0.2.2 — 2026-08-14
 
 ### Fixed

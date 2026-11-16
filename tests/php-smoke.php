@@ -40,6 +40,14 @@ function add_settings_error( $setting, $code, $message, $type = 'error' ) {
 	$GLOBALS['sesamo_test_errors'][] = compact( 'setting', 'code', 'message', 'type' );
 }
 
+function get_settings_errors( $setting = '' ) {
+	$errors = $GLOBALS['sesamo_test_errors'];
+	if ( '' === $setting ) {
+		return $errors;
+	}
+	return array_values( array_filter( $errors, static function ( $error ) use ( $setting ) { return $error['setting'] === $setting; } ) );
+}
+
 function absint( $value ) {
 	return abs( (int) $value );
 }
@@ -153,6 +161,18 @@ $invalid_route = Settings::sanitize(
 sesamo_assert( ! isset( $invalid_route['preset_destinations']['konami'] ), 'An explicitly invalid schema-2 route does not fall back silently.' );
 sesamo_assert( array() === Settings::public_combinations( $invalid_route ), 'No valid route means no public detector configuration.' );
 sesamo_assert( 250 === $invalid_route['max_pause'], 'Timeout is clamped to the minimum.' );
+
+// update_option() runs the sanitize callback twice when the option is first created.
+$GLOBALS['sesamo_test_errors'] = array();
+$cross_origin = array(
+	'schema_version'      => 2,
+	'enabled_presets'     => array( 'konami' ),
+	'preset_destinations' => array( 'konami' => 'https://other.example/konami/' ),
+);
+Settings::sanitize( $cross_origin );
+Settings::sanitize( Settings::sanitize( $cross_origin ) );
+$repeat_codes = array_column( $GLOBALS['sesamo_test_errors'], 'code' );
+sesamo_assert( array( 'invalid_preset_destination' ) === $repeat_codes, 'Repeated sanitize passes register each notice once.' );
 sesamo_assert( array() === Settings::public_combinations( Settings::normalize( array( 'schema_version' => 2, 'enabled_presets' => array( 'konami' ), 'preset_destinations' => array( 'konami' => 'https://example.test/' . str_repeat( 'x', 3000 ) ) ) ) ), 'Oversized destinations fail closed.' );
 
 $malformed = Settings::normalize(
